@@ -146,6 +146,25 @@ main{padding:16px}
   font-size:15px;margin-bottom:12px;
 }
 .small{font-size:12px;color:var(--muted)}
+
+.event-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  margin-bottom:14px;
+}
+.event-card img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+.event-body{padding:14px}
+.event-body h3{margin:0 0 6px;font-size:18px}
+.event-body p{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.45}
+.event-actions{display:flex;gap:8px;flex-wrap:wrap}
+
 </style>
 </head>
 <body>
@@ -163,9 +182,10 @@ main{padding:16px}
     <section id="home" class="panel active">
       <div class="hero-card">
         <div class="eyebrow">Featured need</div>
-        <h3>Book Fair Setup 📚</h3>
-        <p>Tuesday • 9:00–11:00 AM • 4 volunteers still needed</p>
-        <button class="btn" onclick="toast('Demo signup opened')">Sign Up</button>
+        <h3>Pajama Party 🎉</h3>
+        <p><strong>August 22–23</strong> • Help with <strong>snacks</strong> or <strong>games</strong>.<br>
+        16 volunteer slots are currently available across the two days.</p>
+        <button class="btn" onclick="window.open('https://www.signupgenius.com/go/10C0C48ADAF2BA1F8C52-65076863-pajama#/','_blank')">View Available Slots &amp; Sign Up</button>
       </div>
 
       <h2 class="section-title">Start here</h2>
@@ -186,7 +206,7 @@ main{padding:16px}
 
       <h2 class="section-title" style="margin-top:20px">Stay Connected</h2>
       <div class="grid">
-        <div class="tile" onclick="window.location.href='http://track.spe.schoolmessenger.com/f/a/jV_eHaTtwKdYi187pGkRew~~/AAAAARA~/XqzKq6MQT8IcI5w8MU2v_NgMlsIIbkebUJRgw0pdB9zEgCkd3BugC1CJ59Tx9mtjRRpXi9UWGhsMiicq9taqtwpueVrlLXDQKiAC_7e1V319EYRpfYgJHQCXNm8pH3FI'">
+        <div class="tile" onclick="window.open('http://track.spe.schoolmessenger.com/f/a/jV_eHaTtwKdYi187pGkRew~~/AAAAARA~/XqzKq6MQT8IcI5w8MU2v_NgMlsIIbkebUJRgw0pdB9zEgCkd3BugC1CJ59Tx9mtjRRpXi9UWGhsMiicq9taqtwpueVrlLXDQKiAC_7e1V319EYRpfYgJHQCXNm8pH3FI','_blank')">
           <div class="icon">📰</div><strong>Latest News From the Nest</strong><span>Read the latest McGown news and updates.</span>
         </div>
         <div class="tile" onclick="showPanel('socials')">
@@ -224,10 +244,24 @@ main{padding:16px}
     <section id="calendar" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
       <h2 class="section-title">Upcoming Dates</h2>
-      <div class="list">
-        <div class="info-card"><strong>Aug 18 — VIPS Welcome Coffee</strong><span>8:30 AM • Learn what VIPS does and meet the team.</span></div>
-        <div class="info-card"><strong>Aug 25 — Book Fair Setup</strong><span>9:00–11:00 AM • Volunteers needed.</span></div>
-        <div class="info-card"><strong>Sep 2 — Picture Day</strong><span>Morning shifts • Help students move through stations.</span></div>
+
+      <div class="event-card">
+        <img src="first-day-school.jpeg" alt="McGown Elementary First Day of School graphic for Wednesday, August 12, 2026">
+        <div class="event-body">
+          <h3>First Day of School 🦉</h3>
+          <p><strong>Wednesday, August 12, 2026</strong><br>Welcome back, Owls! Let’s make it an owl-some year.</p>
+        </div>
+      </div>
+
+      <div class="event-card">
+        <img src="vips-library-orientation.png" alt="VIPS Library Orientation graphic for September 2 at 9 AM and 2 PM">
+        <div class="event-body">
+          <h3>VIPS Library Orientation 📚</h3>
+          <p><strong>September 2 • 9:00 AM or 2:00 PM</strong><br>Volunteers must complete this training each year.</p>
+          <div class="event-actions">
+            <button class="btn" onclick="window.open('https://37bf.edulnk.com/render/dsy98/-C6JK7?__$u__','_blank')">RSVP</button>
+          </div>
+        </div>
       </div>
     </section>
 
