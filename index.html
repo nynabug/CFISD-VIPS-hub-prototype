@@ -165,7 +165,7 @@ main{padding:16px}
         <div class="eyebrow">Featured need</div>
         <h3>Book Fair Setup 📚</h3>
         <p>Tuesday • 9:00–11:00 AM • 4 volunteers still needed</p>
-        <button class="btn" onclick="window.open('https://www.signupgenius.com/go/10C0C48ADAF2BA1F8C52-65076863-pajama','_blank')">Sign Up</button>
+        <button class="btn" onclick="toast('Demo signup opened')">Sign Up</button>
       </div>
 
       <h2 class="section-title">Start here</h2>
@@ -202,7 +202,7 @@ main{padding:16px}
         </div>
         <div class="op-card" data-tags="week" data-title="Book fair setup">
           <div class="op-head"><div><h3>Book Fair Setup 🎪</h3><div class="meta">Tuesday • 9:00–11:00 AM<br>Multipurpose room</div></div><div class="spots">4 spots</div></div>
-          <div class="op-actions"><button class="btn" onclick="window.open('https://www.signupgenius.com/go/10C0C48ADAF2BA1F8C52-65076863-pajama','_blank')">Sign Up</button><button class="btn secondary" onclick="toast('Shared link copied')">Share</button></div>
+          <div class="op-actions"><button class="btn" onclick="toast('Demo signup opened')">Sign Up</button><button class="btn secondary" onclick="toast('Shared link copied')">Share</button></div>
         </div>
         <div class="op-card" data-tags="home short" data-title="Cut classroom materials">
           <div class="op-head"><div><h3>Cut Classroom Materials ✂️</h3><div class="meta">Flexible • about 45 minutes<br>Complete at home</div></div><div class="spots">Open</div></div>
@@ -223,14 +223,29 @@ main{padding:16px}
 
     <section id="newvolunteer" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
-      <h2 class="section-title">New Volunteer Guide</h2>
-      <div class="steps">
-        <div class="step"><strong>Create/confirm your district volunteer account</strong><span>Complete the district-required registration and approval process.</span></div>
-        <div class="step"><strong>Choose how you'd like to help</strong><span>Browse on-campus, event-based, and at-home opportunities.</span></div>
-        <div class="step"><strong>Sign up for a specific opportunity</strong><span>You'll get the date, location, expectations, and next steps.</span></div>
-        <div class="step"><strong>Check in at the campus</strong><span>Follow campus visitor and volunteer procedures when you arrive.</span></div>
+      <h2 class="section-title">I'm New</h2>
+      <div class="info-card" style="margin-bottom:12px">
+        <strong>Welcome to VIPS! 👋</strong>
+        <span>New here? We’re excited to have you! All volunteers are required to fill out the confidentiality agreement below and to register in Raptor. Once you’ve completed those steps, use the interest forms to let us know how you’d like to get involved.</span>
       </div>
-      <button class="btn" onclick="toast('Would link to CFISD volunteer registration')">Go to District Registration</button>
+      <div class="list">
+        <div class="info-card">
+          <strong>1. REQUIRED for all volunteers: Register in Raptor</strong>
+          <div class="op-actions"><button class="btn" onclick="window.open('https://apps.raptortech.com/Apply/MzYxOmVuLVVT','_blank')">Register in Raptor</button></div>
+        </div>
+        <div class="info-card">
+          <strong>2. REQUIRED for all volunteers: Confidentiality Agreement</strong>
+          <div class="op-actions"><button class="btn" onclick="window.open('https://forms.gle/MbehKfuxe1QD1N6R8','_blank')">Confidentiality Agreement</button></div>
+        </div>
+        <div class="info-card">
+          <strong>3. I’m interested in volunteering for…</strong>
+          <div class="op-actions"><button class="btn secondary" onclick="window.open('https://tinyurl.com/McGownVIPSInterestSurvey26','_blank')">Volunteer Interest Form</button></div>
+        </div>
+        <div class="info-card">
+          <strong>4. I’m interested in serving as a liaison for…</strong>
+          <div class="op-actions"><button class="btn secondary" onclick="window.open('https://tinyurl.com/McGownLiaisonsSurvey26','_blank')">Liaison Interest Form</button></div>
+        </div>
+      </div>
     </section>
 
     <section id="athome" class="panel">
