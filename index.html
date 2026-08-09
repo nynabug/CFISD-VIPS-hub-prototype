@@ -6,16 +6,20 @@
 <title>VIPS Hub Prototype</title>
 <style>
 :root{
-  --bg:#f5f7fb;
+  --bg:#f4f8f7;
   --card:#ffffff;
-  --text:#152033;
-  --muted:#687386;
-  --line:#dfe5ee;
-  --accent:#1f5f99;
-  --accent2:#e7f1fa;
+  --text:#11283a;
+  --muted:#647583;
+  --line:#d9e4e4;
+  --accent:#16858f;
+  --accent-dark:#0e5661;
+  --accent2:#e5f5f4;
+  --purple:#59448f;
+  --lime:#b8cb39;
+  --gold:#f2c84b;
   --good:#2f7d57;
   --warn:#b86816;
-  --shadow:0 8px 22px rgba(20,35,60,.08);
+  --shadow:0 8px 24px rgba(17,40,58,.09);
 }
 *{box-sizing:border-box}
 body{
@@ -165,6 +169,138 @@ main{padding:16px}
 .event-body p{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.45}
 .event-actions{display:flex;gap:8px;flex-wrap:wrap}
 
+
+/* McGown-inspired prototype branding */
+body{
+  background:
+    radial-gradient(circle at 10% 0%, rgba(22,133,143,.08), transparent 28%),
+    radial-gradient(circle at 100% 18%, rgba(89,68,143,.07), transparent 24%),
+    var(--bg);
+}
+.app{background:transparent}
+header{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#0f5d68 0%,#16858f 62%,#287f9f 100%);
+  border-radius:0 0 28px 28px;
+  padding:18px 18px 20px;
+}
+header:after{
+  content:"🦉";
+  position:absolute;
+  right:18px;
+  bottom:-10px;
+  font-size:82px;
+  opacity:.13;
+  transform:rotate(-6deg);
+}
+.brandline{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:14px;
+  position:relative;
+  z-index:1;
+}
+.brand-owl{
+  width:44px;height:44px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#fff;
+  color:var(--accent-dark);
+  font-size:25px;
+  box-shadow:0 4px 12px rgba(0,0,0,.14);
+}
+.brand-copy small{
+  display:block;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.11em;
+  font-weight:800;
+  color:#d7f4f3;
+}
+.brand-copy strong{
+  display:block;
+  font-size:17px;
+  letter-spacing:.01em;
+}
+header h1{position:relative;z-index:1;margin-top:15px}
+.subtitle{position:relative;z-index:1;max-width:390px}
+.school-tagline{
+  margin:12px 0 0;
+  padding:9px 11px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.17);
+  border-radius:12px;
+  font-size:12px;
+  line-height:1.35;
+  color:#eefbfb;
+  position:relative;
+  z-index:1;
+}
+.section-title{
+  color:var(--accent-dark);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.section-title:after{
+  content:"";
+  height:3px;
+  border-radius:999px;
+  flex:1;
+  background:linear-gradient(90deg,var(--lime),transparent);
+  opacity:.75;
+}
+.tile{
+  border-top:4px solid var(--accent);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.tile:nth-child(even){border-top-color:var(--purple)}
+.tile:hover{transform:translateY(-2px)}
+.hero-card{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#fff9e8,#f4f8dd);
+  border:1px solid #dde6a1;
+}
+.hero-card:after{
+  content:"★";
+  position:absolute;right:13px;top:8px;
+  font-size:54px;color:var(--lime);opacity:.13;
+}
+.hero-card .eyebrow{color:var(--purple);letter-spacing:.08em}
+.btn{
+  background:linear-gradient(135deg,var(--accent-dark),var(--accent));
+  box-shadow:0 3px 8px rgba(14,86,97,.18);
+}
+.btn.secondary{
+  background:#eeeaf8;
+  color:var(--purple);
+  box-shadow:none;
+}
+.chip.active{background:var(--purple);border-color:var(--purple)}
+.spots{background:#e8f6ef;color:var(--good)}
+.op-card{border-left:4px solid var(--accent)}
+.info-card{border-left:4px solid var(--purple)}
+.event-card{border-top:4px solid var(--accent)}
+.bottomnav{box-shadow:0 -4px 18px rgba(17,40,58,.06)}
+.navbtn.active{color:var(--accent-dark)}
+.brand-footer{
+  margin-top:22px;
+  padding:16px 12px 6px;
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.5;
+}
+.brand-footer strong{color:var(--accent-dark)}
+.brand-footer .dots{
+  letter-spacing:5px;
+  color:var(--purple);
+  font-size:15px;
+  margin-bottom:4px;
+}
+
 </style>
 </head>
 <body>
@@ -172,10 +308,18 @@ main{padding:16px}
   <header>
     <div class="topline">
       <div class="badge">Prototype</div>
-      <div class="badge">Campus VIPS</div>
+      <div class="badge">McGown VIPS</div>
+    </div>
+    <div class="brandline">
+      <div class="brand-owl">🦉</div>
+      <div class="brand-copy">
+        <small>Sue McGown Elementary</small>
+        <strong>VIPS Volunteer Hub</strong>
+      </div>
     </div>
     <h1>How would you like to help?</h1>
-    <p class="subtitle">One place to find volunteer opportunities, upcoming dates, and everything you need to get involved.</p>
+    <p class="subtitle">One friendly home base for McGown families to find volunteer opportunities, upcoming dates, news, and ways to get involved.</p>
+    <p class="school-tagline">Inspired, equipped, and empowered — McGown Owls helping our school community thrive.</p>
   </header>
 
   <main>
@@ -188,7 +332,7 @@ main{padding:16px}
         <button class="btn" onclick="window.open('https://www.signupgenius.com/go/10C0C48ADAF2BA1F8C52-65076863-pajama#/','_blank')">View Available Slots &amp; Sign Up</button>
       </div>
 
-      <h2 class="section-title">Start here</h2>
+      <h2 class="section-title">🦉 Start Here</h2>
       <div class="grid">
         <div class="tile" onclick="showPanel('opportunities')">
           <div class="icon">🙌</div><strong>Volunteer Now</strong><span>See current opportunities and open spots.</span>
@@ -204,7 +348,7 @@ main{padding:16px}
         </div>
       </div>
 
-      <h2 class="section-title" style="margin-top:20px">Stay Connected</h2>
+      <h2 class="section-title" style="margin-top:20px">💬 Stay Connected</h2>
       <div class="grid">
         <div class="tile" onclick="window.open('http://track.spe.schoolmessenger.com/f/a/jV_eHaTtwKdYi187pGkRew~~/AAAAARA~/XqzKq6MQT8IcI5w8MU2v_NgMlsIIbkebUJRgw0pdB9zEgCkd3BugC1CJ59Tx9mtjRRpXi9UWGhsMiicq9taqtwpueVrlLXDQKiAC_7e1V319EYRpfYgJHQCXNm8pH3FI','_blank')">
           <div class="icon">📰</div><strong>Latest News From the Nest</strong><span>Read the latest McGown news and updates.</span>
@@ -217,7 +361,7 @@ main{padding:16px}
 
     <section id="opportunities" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
-      <h2 class="section-title">Volunteer Opportunities</h2>
+      <h2 class="section-title">🙌 Volunteer Opportunities</h2>
       <input class="search" placeholder="Search opportunities…" oninput="filterCards(this.value)">
       <div class="filters">
         <button class="chip active" onclick="setFilter(this,'all')">All</button>
@@ -243,7 +387,7 @@ main{padding:16px}
 
     <section id="calendar" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
-      <h2 class="section-title">Upcoming Dates</h2>
+      <h2 class="section-title">📅 Upcoming Dates</h2>
 
       <div class="event-card">
         <img src="first-day-school.jpeg" alt="McGown Elementary First Day of School graphic for Wednesday, August 12, 2026">
@@ -267,7 +411,7 @@ main{padding:16px}
 
     <section id="newvolunteer" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
-      <h2 class="section-title">I'm New</h2>
+      <h2 class="section-title">🆕 I'm New</h2>
       <div class="info-card" style="margin-bottom:12px">
         <strong>Welcome to VIPS! 👋</strong>
         <span>New here? We’re excited to have you! All volunteers are required to fill out the confidentiality agreement below and to register in Raptor. Once you’ve completed those steps, use the interest forms to let us know how you’d like to get involved.</span>
@@ -294,7 +438,7 @@ main{padding:16px}
 
     <section id="athome" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
-      <h2 class="section-title">Help From Home</h2>
+      <h2 class="section-title">🏠 Help From Home</h2>
       <div class="list">
         <div class="info-card"><strong>Prep classroom flash cards</strong><span>30–45 min • Materials sent home with your child or picked up at front desk.</span></div>
         <div class="info-card"><strong>Cut labels for teacher bins</strong><span>20–30 min • Flexible timing.</span></div>
@@ -304,7 +448,7 @@ main{padding:16px}
 
     <section id="socials" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
-      <h2 class="section-title">Socials</h2>
+      <h2 class="section-title">💬 Socials</h2>
       <p class="small" style="font-size:14px;line-height:1.5;margin-top:0;margin-bottom:14px">Connect with McGown Elementary and local parent communities.</p>
       <div class="list">
         <div class="info-card">
@@ -324,13 +468,19 @@ main{padding:16px}
 
     <section id="help" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
-      <h2 class="section-title">Help & FAQ</h2>
+      <h2 class="section-title">❓ Help & FAQ</h2>
       <div class="list">
         <div class="info-card"><strong>Do I need volunteer approval?</strong><span>For many campus roles, yes. This hub would route you to the official CFISD process.</span></div>
         <div class="info-card"><strong>Where do I check in?</strong><span>At the campus front office according to district and campus procedures.</span></div>
         <div class="info-card"><strong>Who do I contact?</strong><span>A future version could show the campus VIPS liaison plus a simple “Ask VIPS” form.</span></div>
       </div>
     </section>
+    <div class="brand-footer">
+      <div class="dots">● ● ●</div>
+      <strong>McGown VIPS Volunteer Hub</strong><br>
+      Prototype volunteer resource • Sue McGown Elementary<br>
+      This prototype is not an official CFISD website.
+    </div>
   </main>
 
   <div class="bottomnav">
