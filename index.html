@@ -425,6 +425,9 @@ header h1{position:relative;z-index:1;margin-top:15px}
       </div>
 
       <input class="search" id="opSearch" placeholder="Search opportunities…" oninput="applyOpportunityFilters()">
+      <div style="margin:10px 0 4px">
+        <button class="btn secondary" id="resetOpportunityFilters" onclick="resetOpportunityFilters()">↻ All / Reset Filters</button>
+      </div>
 
       <div class="filter-group">
         <span class="filter-label">Event date</span>
@@ -718,6 +721,26 @@ function setOpportunityFilter(btn, group, value){
   applyOpportunityFilters();
 }
 
+
+
+function resetOpportunityFilters(){
+  opportunityFilters.date = 'all';
+  opportunityFilters.time = 'all';
+  opportunityFilters.grades = [];
+  opportunityFilters.type = 'all';
+  opportunityFilters.committee = 'all';
+
+  const search = document.getElementById('opSearch');
+  if(search) search.value = '';
+
+  document.querySelectorAll('#opportunities .filter-row').forEach(row => {
+    row.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+    const allChip = row.querySelector('[data-value="all"]');
+    if(allChip) allChip.classList.add('active');
+  });
+
+  applyOpportunityFilters();
+}
 
 function toggleGradeFilter(btn, value){
   const row = btn.closest('.filter-row');
