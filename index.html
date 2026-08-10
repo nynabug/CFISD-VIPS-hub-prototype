@@ -352,6 +352,86 @@ header h1{position:relative;z-index:1;margin-top:15px}
   color:#536470;
 }
 
+
+.committee-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:14px 0;
+}
+.committee-card{
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:white;
+  padding:14px;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:var(--shadow);
+}
+.committee-card.active{
+  border-color:var(--accent);
+  background:var(--accent2);
+}
+.committee-card .committee-icon{
+  font-size:25px;
+  margin-bottom:8px;
+}
+.committee-card strong{
+  display:block;
+  margin-bottom:5px;
+}
+.committee-card span{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.4;
+}
+.leadership-card{
+  text-align:center;
+  background:linear-gradient(135deg,#eeeaf8,#e7f5f4);
+  border:1px solid #d8d0ee;
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:12px;
+}
+.leadership-card strong{
+  display:block;
+  color:var(--purple);
+  font-size:18px;
+  margin-bottom:5px;
+}
+.committee-detail{
+  margin-top:14px;
+}
+.role-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+.role-card{
+  background:white;
+  border:1px solid var(--line);
+  border-left:4px solid var(--purple);
+  border-radius:14px;
+  padding:14px;
+}
+.role-card .role-icon{
+  font-size:22px;
+  margin-bottom:5px;
+}
+.role-card strong{
+  display:block;
+  margin-bottom:5px;
+}
+.role-card span{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+@media (min-width:520px){
+  .committee-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .role-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
 </style>
 </head>
 <body>
@@ -396,6 +476,9 @@ header h1{position:relative;z-index:1;margin-top:15px}
         </div>
         <div class="tile" onclick="showPanel('athome')">
           <div class="icon">🏠</div><strong>Help From Home</strong><span>Find flexible tasks you can do off campus.</span>
+        </div>
+        <div class="tile" onclick="showPanel('committeemap')">
+          <div class="icon">🧭</div><strong>Committee Map</strong><span>See how VIPS is organized and what each group supports.</span>
         </div>
       </div>
 
@@ -616,6 +699,62 @@ header h1{position:relative;z-index:1;margin-top:15px}
       </div>
     </section>
 
+    <section id="committeemap" class="panel">
+      <button class="back" onclick="showPanel('home')">← Home</button>
+      <h2 class="section-title">🧭 Interactive Committee Map</h2>
+
+      <div class="leadership-card">
+        <div style="font-size:28px;margin-bottom:6px">👥</div>
+        <strong>VIPS Lead Co-Chairs</strong>
+        <span>Provide leadership, set direction, and support all VIPS committees.</span>
+      </div>
+
+      <p class="small" style="font-size:14px;line-height:1.5;margin-bottom:10px">
+        Select a committee to explore the roles that support McGown students, staff, and families.
+      </p>
+
+      <div class="committee-grid">
+        <button class="committee-card active" data-committee="community" onclick="renderCommittee('community',this)">
+          <div class="committee-icon">🤝</div>
+          <strong>Community Outreach</strong>
+          <span>Builds connections and strengthens partnerships within and beyond McGown.</span>
+        </button>
+        <button class="committee-card" data-committee="fundraising" onclick="renderCommittee('fundraising',this)">
+          <div class="committee-icon">💜</div>
+          <strong>Fundraising</strong>
+          <span>Raises funds and resources to enhance student and teacher experiences.</span>
+        </button>
+        <button class="committee-card" data-committee="special" onclick="renderCommittee('special',this)">
+          <div class="committee-icon">🎉</div>
+          <strong>Special Programs</strong>
+          <span>Supports memorable events and programs across the school community.</span>
+        </button>
+        <button class="committee-card" data-committee="instructional" onclick="renderCommittee('instructional',this)">
+          <div class="committee-icon">📚</div>
+          <strong>Instructional Volunteers</strong>
+          <span>Supports learning through volunteer-led resources and enrichment.</span>
+        </button>
+        <button class="committee-card" data-committee="classroom" onclick="renderCommittee('classroom',this)">
+          <div class="committee-icon">🍎</div>
+          <strong>Classroom Volunteers</strong>
+          <span>Connects teachers, homeroom parents, and grade-level families.</span>
+        </button>
+      </div>
+
+      <div class="committee-detail">
+        <div class="info-card" style="margin-bottom:10px;border-left-color:var(--accent)">
+          <strong id="committeeMapTitle">Community Outreach</strong>
+          <span id="committeeMapSummary">Builds connections and strengthens partnerships within and beyond McGown.</span>
+        </div>
+        <div id="committeeRoleGrid" class="role-grid"></div>
+      </div>
+
+      <div class="info-card" style="margin-top:14px;border-left-color:var(--gold);background:#fffaf0">
+        <strong>ℹ️ About these descriptions</strong>
+        <span>These are brief informational summaries of the liaison and volunteer roles in the 2026–27 VIPS structure. Contact information can be added later as part of a “Who to Contact” feature.</span>
+      </div>
+    </section>
+
     <section id="socials" class="panel">
       <button class="back" onclick="showPanel('home')">← Home</button>
       <h2 class="section-title">💬 Socials</h2>
@@ -801,6 +940,100 @@ function applyOpportunityFilters(){
   const empty = document.getElementById('noOpportunityResults');
   if(empty) empty.style.display = visible === 0 ? 'block' : 'none';
 }
+
+
+const committeeMapData = {
+  community:{
+    title:'Community Outreach',
+    summary:'Builds connections and strengthens partnerships within and beyond McGown.',
+    roles:[
+      {icon:'📘',name:'Yearbook',summary:'Coordinates the annual McGown yearbook, including photos, vendor coordination, advertising, page deadlines, student information review, and distribution.'},
+      {icon:'🪽',name:'Wings of McGown',summary:'Helps coordinate general campus volunteer needs, including creating SignUpGenius requests for activities such as screenings and picture day.'},
+      {icon:'🐾',name:'Watch D.O.G.S.',summary:'Supports McGown’s father-figure volunteer program by helping recruit participants, coordinate schedules, and celebrate volunteers on campus.'},
+      {icon:'🤝',name:'Bang School Adoption',summary:'Supports McGown’s partnership with Bang Elementary through donation drives, family support initiatives, and staff appreciation efforts.'},
+      {icon:'💪',name:'McGown Muscles',summary:'Coordinates volunteers for physically demanding campus needs such as event setup and campus-beautification projects.'},
+      {icon:'🔎',name:'Lost & Found',summary:'Develops systems to organize lost items, help families view what has been found, and reunite belongings with their owners.'}
+    ]
+  },
+  fundraising:{
+    title:'Fundraising',
+    summary:'Raises funds and resources to enhance student and teacher experiences at McGown.',
+    roles:[
+      {icon:'💵',name:'Fundraisers',summary:'Supports major and smaller fundraising efforts by seeking sponsorships, promoting events, coordinating volunteers, and helping with event execution.'},
+      {icon:'🍽️',name:'Spirit Nights',summary:'Coordinates restaurant and business partnership nights, including scheduling, promotion, communication, and tracking proceeds.'},
+      {icon:'💐',name:'Staff Appreciation',summary:'Plans staff-appreciation activities and works with community sponsors to provide meals, treats, and recognition throughout the year.'},
+      {icon:'🛍️',name:'Spirit Store',summary:'Assists with planning, ordering, and distributing McGown Spirit Store merchandise.'}
+    ]
+  },
+  special:{
+    title:'Special Programs',
+    summary:'Creates and supports memorable events and programs that enrich the McGown community.',
+    roles:[
+      {icon:'🎖️',name:'Fall Programs: Career Week & Veterans Day',summary:'Helps plan Veterans Day and Career Week through volunteer recruitment, communications, event logistics, community participation, and campus coordination.'},
+      {icon:'🌎',name:'Beauty of McGown',summary:'Supports McGown’s multicultural festival by coordinating event logistics, supplies, volunteers, rehearsals, and grade-level communication.'},
+      {icon:'🎨',name:'Decor',summary:'Plans and installs decorations and displays for school-wide special events while coordinating with staff and following campus safety requirements.'},
+      {icon:'🍎',name:'Lunch Visitors',summary:'Creates and maintains monthly lunch-visitor signups and coordinates closely with administration on visitor schedules and campus availability.'},
+      {icon:'🎵',name:'Music',summary:'Supports the Kindergarten, 2nd-grade, and 4th-grade musical programs with performance preparation, event coordination, and grade-level backdrops.'}
+    ]
+  },
+  instructional:{
+    title:'Instructional Volunteers',
+    summary:'Supports learning and instruction through volunteer-led resources and enrichment.',
+    roles:[
+      {icon:'📚',name:'Library',summary:'Works with the librarian to coordinate volunteer training, monthly library shifts, special-program signups, and coverage of open volunteer needs.'},
+      {icon:'🔬',name:'SRC — Science Resource Center',summary:'Coordinates parent training, classroom animal demonstrations, and transportation of animals between the Science Resource Center and McGown.'},
+      {icon:'🎨',name:'Specials: Art, Spanish ABL, PE & Field Day',summary:'Supports Specials teachers with displays, programs, supplies, event volunteers, and classroom-specific communication.'},
+      {icon:'🌱',name:'Garden',summary:'Coordinates with the school on garden management and organizes volunteers to weed, maintain, and support the campus garden.'}
+    ]
+  },
+  classroom:{
+    title:'Classroom Volunteers',
+    summary:'Partners with teachers and homeroom parents to support students and grade-level activities.',
+    roles:[
+      {icon:'🧸',name:'Pre-K Homeroom Parent Rep',summary:'Serves as a grade-level parent point of contact, helps organize parent participation, supports classroom needs, and coordinates grade-level volunteer tasks.'},
+      {icon:'🖍️',name:'Kindergarten Homeroom Parent Rep',summary:'Connects kindergarten teachers and families, coordinates parent participation, and helps organize classroom and grade-level needs.'},
+      {icon:'1️⃣',name:'1st Grade Homeroom Parent Rep',summary:'Supports 1st-grade teachers and families by coordinating communication, classroom help, events, and grade-level volunteer participation.'},
+      {icon:'2️⃣',name:'2nd Grade Homeroom Parent Rep',summary:'Supports 2nd-grade teachers and families by coordinating communication, classroom help, events, and grade-level volunteer participation.'},
+      {icon:'3️⃣',name:'3rd Grade Homeroom Parent Rep',summary:'Supports 3rd-grade teachers and families by coordinating communication, classroom help, events, and grade-level volunteer participation.'},
+      {icon:'4️⃣',name:'4th Grade Homeroom Parent Rep',summary:'Supports 4th-grade teachers and families by coordinating communication, classroom help, events, and grade-level volunteer participation.'},
+      {icon:'5️⃣',name:'5th Grade HRP & Programs',summary:'Coordinates 5th-grade parent communication and participation while also helping support the grade’s additional programs and activities.'}
+    ]
+  }
+};
+
+function renderCommittee(id, button){
+  const c = committeeMapData[id];
+  const title = document.getElementById('committeeMapTitle');
+  const summary = document.getElementById('committeeMapSummary');
+  const grid = document.getElementById('committeeRoleGrid');
+
+  if(!c || !title || !summary || !grid) return;
+
+  title.textContent = c.title;
+  summary.textContent = c.summary;
+  grid.innerHTML = '';
+
+  c.roles.forEach(role => {
+    const card = document.createElement('div');
+    card.className = 'role-card';
+    card.innerHTML = `
+      <div class="role-icon" aria-hidden="true">${role.icon}</div>
+      <strong>${role.name}</strong>
+      <span>${role.summary}</span>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.querySelectorAll('#committeemap .committee-card')
+    .forEach(btn => btn.classList.remove('active'));
+
+  if(button) button.classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const initialButton = document.querySelector('#committeemap .committee-card[data-committee="community"]');
+  renderCommittee('community', initialButton);
+});
 
 </script>
 </body>
