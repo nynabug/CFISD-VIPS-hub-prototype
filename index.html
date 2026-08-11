@@ -581,6 +581,26 @@ header h1{position:relative;z-index:1;margin-top:15px}
   .featured-body p{font-size:12px}
 }
 
+
+.install-modal-backdrop{
+  position:fixed;inset:0;background:rgba(14,34,48,.62);display:none;
+  align-items:flex-end;justify-content:center;z-index:1000;padding:14px;
+}
+.install-modal-backdrop.show{display:flex}
+.install-modal{
+  width:min(520px,100%);background:white;border-radius:20px 20px 14px 14px;
+  padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.24);
+}
+.install-modal h3{margin:0 0 6px;font-size:20px;color:var(--accent-dark)}
+.install-modal p{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.45}
+.install-steps{margin:0 0 14px 20px;padding:0}
+.install-steps li{margin:8px 0;line-height:1.4;font-size:14px}
+.install-note{
+  background:var(--accent2);border:1px solid var(--line);border-radius:12px;
+  padding:10px 11px;font-size:12px;color:var(--accent-dark);margin-bottom:12px;
+}
+.install-modal-actions{display:flex;justify-content:flex-end}
+
 </style>
 </head>
 <body>
@@ -599,7 +619,9 @@ header h1{position:relative;z-index:1;margin-top:15px}
     </div>
     <h1>How would you like to help?</h1>
     <p class="subtitle">One friendly home base for McGown families to find volunteer opportunities, upcoming dates, news, and ways to get involved.</p>
-    <p class="school-tagline">Inspired, equipped, and empowered — McGown Owls helping our school community thrive.</p>
+    <button class="school-tagline" id="iosInstallBtn" type="button" onclick="openIosInstallHelp()" style="width:100%;text-align:left;cursor:pointer;border:1px solid rgba(255,255,255,.17)">
+      📱 iOS users — click here to add this website like an app to your Home Screen
+    </button>
   </header>
 
   <main>
@@ -1043,6 +1065,24 @@ header h1{position:relative;z-index:1;margin-top:15px}
     </div>
   </main>
 
+  <div class="install-modal-backdrop" id="iosInstallModal" role="dialog" aria-modal="true" aria-labelledby="iosInstallTitle" onclick="closeIosInstallHelp(event)">
+    <div class="install-modal" onclick="event.stopPropagation()">
+      <h3 id="iosInstallTitle">Add the VIPS Hub like an app 📱</h3>
+      <p>On iPhone or iPad, you can add this site to your Home Screen so it opens like an app.</p>
+      <ol class="install-steps">
+        <li>Open this page in <strong>Safari</strong>.</li>
+        <li>Tap the <strong>More</strong> button, then <strong>Share</strong> — or tap the <strong>Share</strong> button directly, depending on your Safari layout.</li>
+        <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+        <li>Turn on <strong>Open as Web App</strong>.</li>
+        <li>Tap <strong>Add</strong>.</li>
+      </ol>
+      <div class="install-note">If you don’t see “Add to Home Screen,” scroll to the bottom of the Share sheet, tap <strong>Edit Actions</strong>, and add it there.</div>
+      <div class="install-modal-actions">
+        <button class="btn" type="button" onclick="closeIosInstallHelp()">Got it</button>
+      </div>
+    </div>
+  </div>
+
   <div class="bottomnav">
     <button class="navbtn active" onclick="navTo(this,'home')"><b>🏠</b>Home</button>
     <button class="navbtn" onclick="navTo(this,'opportunities')"><b>🙌</b>Volunteer</button>
@@ -1332,6 +1372,23 @@ document.addEventListener('DOMContentLoaded',()=>{
         updateFeaturedDots();
       },80);
     });
+  }
+});
+
+
+function openIosInstallHelp(){
+  const modal=document.getElementById('iosInstallModal');
+  if(modal) modal.classList.add('show');
+}
+function closeIosInstallHelp(event){
+  if(event && event.target && event.target.id!=='iosInstallModal') return;
+  const modal=document.getElementById('iosInstallModal');
+  if(modal) modal.classList.remove('show');
+}
+document.addEventListener('keydown',function(event){
+  if(event.key==='Escape'){
+    const modal=document.getElementById('iosInstallModal');
+    if(modal) modal.classList.remove('show');
   }
 });
 
