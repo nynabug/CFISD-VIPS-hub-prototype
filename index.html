@@ -989,11 +989,26 @@ header h1{position:relative;z-index:1;margin-top:15px}
       <button class="back" onclick="showPanel('home')">← Home</button>
       <h2 class="section-title">📅 Upcoming Dates</h2>
 
-      <div class="event-card">
-        <img src="first-day-school.jpeg" alt="McGown Elementary First Day of School graphic for Wednesday, August 12, 2026">
+      <div class="event-card" id="libraryOrientationEvent">
+        <img src="vips-library-orientation.png" alt="VIPS Library Orientation graphic for September 2 at 9 AM and 2 PM">
         <div class="event-body">
-          <h3>First Day of School 🦉</h3>
-          <p><strong>Wednesday, August 12, 2026</strong><br>Welcome back, Owls! Let’s make it an owl-some year.</p>
+          <h3>VIPS Library Orientation 📚</h3>
+          <p><strong>September 2 • 9:00 AM or 2:00 PM</strong><br>Volunteers must complete this training each year.</p>
+          <div class="event-actions">
+            <button class="btn" onclick="window.open('https://37bf.edulnk.com/render/dsy98/-C6JK7?__$u__','_blank')">RSVP</button>
+            <button class="calendar-btn" type="button" onclick="downloadCalendarEvent({
+              title:'VIPS Library Orientation',
+              start:'20260902T090000',
+              allDay:false,
+              details:'Required for anyone volunteering in the library during the 2026–27 school year.'
+            })">＋ Add 9 AM</button>
+            <button class="calendar-btn" type="button" onclick="downloadCalendarEvent({
+              title:'VIPS Library Orientation',
+              start:'20260902T140000',
+              allDay:false,
+              details:'Required for anyone volunteering in the library during the 2026–27 school year.'
+            })">＋ Add 2 PM</button>
+          </div>
         </div>
       </div>
 
@@ -1029,28 +1044,15 @@ header h1{position:relative;z-index:1;margin-top:15px}
         </div>
       </div>
 
-      <div class="event-card" id="libraryOrientationEvent">
-        <img src="vips-library-orientation.png" alt="VIPS Library Orientation graphic for September 2 at 9 AM and 2 PM">
+      <div class="event-card">
+        <img src="first-day-school.jpeg" alt="McGown Elementary First Day of School graphic for Wednesday, August 12, 2026">
         <div class="event-body">
-          <h3>VIPS Library Orientation 📚</h3>
-          <p><strong>September 2 • 9:00 AM or 2:00 PM</strong><br>Volunteers must complete this training each year.</p>
-          <div class="event-actions">
-            <button class="btn" onclick="window.open('https://37bf.edulnk.com/render/dsy98/-C6JK7?__$u__','_blank')">RSVP</button>
-            <button class="calendar-btn" type="button" onclick="downloadCalendarEvent({
-              title:'VIPS Library Orientation',
-              start:'20260902T090000',
-              allDay:false,
-              details:'Required for anyone volunteering in the library during the 2026–27 school year.'
-            })">＋ Add 9 AM</button>
-            <button class="calendar-btn" type="button" onclick="downloadCalendarEvent({
-              title:'VIPS Library Orientation',
-              start:'20260902T140000',
-              allDay:false,
-              details:'Required for anyone volunteering in the library during the 2026–27 school year.'
-            })">＋ Add 2 PM</button>
-          </div>
+          <h3>First Day of School 🦉</h3>
+          <p><strong>Wednesday, August 12, 2026</strong><br>Welcome back, Owls! Let’s make it an owl-some year.</p>
         </div>
       </div>
+
+
     </section>
 
     <section id="newvolunteer" class="panel">
