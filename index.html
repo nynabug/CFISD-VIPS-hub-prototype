@@ -643,9 +643,13 @@ header h1{position:relative;z-index:1;margin-top:15px}
     </div>
     <h1>How would you like to help?</h1>
     <p class="subtitle">One friendly home base for McGown families to find volunteer opportunities, upcoming dates, news, and ways to get involved.</p>
-    <button class="school-tagline" id="iosInstallBtn" type="button" onclick="openIosInstallHelp()" style="width:100%;text-align:left;cursor:pointer;border:1px solid rgba(255,255,255,.17)">
-      📱 iOS users — click here to add this website like an app to your Home Screen
-    </button>
+    <div class="school-tagline" style="width:100%;border:1px solid rgba(255,255,255,.17)">
+      <div style="margin-bottom:8px;line-height:1.35">Tap here from your mobile device to add this website like an app to your Home Screen.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" onclick="openIosInstallHelp()" style="flex:1;min-width:120px;border:0;border-radius:10px;padding:8px 10px;background:white;color:var(--accent-dark);font-weight:800;cursor:pointer"> iOS</button>
+        <button type="button" onclick="openAndroidInstallHelp()" style="flex:1;min-width:120px;border:0;border-radius:10px;padding:8px 10px;background:white;color:var(--accent-dark);font-weight:800;cursor:pointer">Android</button>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -1111,6 +1115,23 @@ header h1{position:relative;z-index:1;margin-top:15px}
     </div>
   </div>
 
+  <div class="install-modal-backdrop" id="androidInstallModal" role="dialog" aria-modal="true" aria-labelledby="androidInstallTitle" onclick="closeAndroidInstallHelp(event)">
+    <div class="install-modal" onclick="event.stopPropagation()">
+      <h3 id="androidInstallTitle">Add the VIPS Hub like an app</h3>
+      <p>On an Android device, you can add this site to your Home Screen for quick access.</p>
+      <ol class="install-steps">
+        <li>Open this page in <strong>Chrome</strong>.</li>
+        <li>Tap the <strong>⋮ menu</strong> next to the address bar.</li>
+        <li>Tap <strong>Add to home screen</strong>.</li>
+        <li>Choose <strong>Create shortcut</strong>, then tap <strong>Add</strong>.</li>
+      </ol>
+      <div class="install-note">Depending on your Android device and Chrome version, you may see <strong>Install</strong> instead. If so, tap Install and follow the prompts.</div>
+      <div class="install-modal-actions">
+        <button class="btn" type="button" onclick="closeAndroidInstallHelp()">Got it</button>
+      </div>
+    </div>
+  </div>
+
   <div class="share-modal-backdrop" id="sharePageModal" role="dialog" aria-modal="true" aria-labelledby="sharePageTitle" onclick="closeSharePage(event)">
     <div class="share-modal" onclick="event.stopPropagation()">
       <h3 id="sharePageTitle">Share the VIPS Hub</h3>
@@ -1507,6 +1528,17 @@ window.addEventListener('pageshow',()=>setTimeout(checkForVipsUpdate,400));
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible') setTimeout(checkForVipsUpdate,400);
 });
+
+
+function openAndroidInstallHelp(){
+  const modal=document.getElementById('androidInstallModal');
+  if(modal) modal.classList.add('show');
+}
+function closeAndroidInstallHelp(event){
+  if(event && event.target && event.target.id!=='androidInstallModal') return;
+  const modal=document.getElementById('androidInstallModal');
+  if(modal) modal.classList.remove('show');
+}
 
 </script>
 </body>
