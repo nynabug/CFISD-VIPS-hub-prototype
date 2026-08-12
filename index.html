@@ -601,6 +601,22 @@ header h1{position:relative;z-index:1;margin-top:15px}
 }
 .install-modal-actions{display:flex;justify-content:flex-end}
 
+
+.share-page-wrap{margin:18px 0 4px;text-align:center}
+.share-page-btn{border:1px solid var(--line);background:white;color:var(--accent-dark);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.share-page-btn:hover{border-color:var(--accent)}
+.share-modal-backdrop{position:fixed;inset:0;background:rgba(14,34,48,.62);display:none;align-items:flex-end;justify-content:center;z-index:1100;padding:14px}
+.share-modal-backdrop.show{display:flex}
+.share-modal{width:min(520px,100%);background:white;border-radius:20px 20px 14px 14px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.24)}
+.share-modal h3{margin:0 0 5px;font-size:20px;color:var(--accent-dark)}
+.share-modal p{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.4}
+.share-qr{display:flex;justify-content:center;margin:10px 0 14px}
+.share-qr img{width:190px;height:190px;max-width:65vw;max-height:65vw;border-radius:12px;border:1px solid var(--line);background:white;padding:7px}
+.share-link-box{display:flex;gap:7px;align-items:stretch}
+.share-link-box input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:12px;color:var(--text);background:#f8fafb}
+.share-status{min-height:18px;margin-top:7px;font-size:12px;color:var(--good)}
+.share-modal-actions{display:flex;justify-content:flex-end;margin-top:6px}
+
 </style>
 </head>
 <body>
@@ -1057,6 +1073,10 @@ header h1{position:relative;z-index:1;margin-top:15px}
         <div class="info-card"><strong>Who do I contact?</strong><span>A future version could show the campus VIPS liaison plus a simple “Ask VIPS” form.</span></div>
       </div>
     </section>
+    <div class="share-page-wrap">
+      <button class="share-page-btn" type="button" onclick="openSharePage()">↗ Share this page</button>
+    </div>
+
     <div class="brand-footer">
       <div class="dots">● ● ●</div>
       <strong>McGown VIPS Volunteer Hub</strong><br>
@@ -1079,6 +1099,24 @@ header h1{position:relative;z-index:1;margin-top:15px}
       <div class="install-note">If you don’t see “Add to Home Screen,” scroll to the bottom of the Share sheet, tap <strong>Edit Actions</strong>, and add it there.</div>
       <div class="install-modal-actions">
         <button class="btn" type="button" onclick="closeIosInstallHelp()">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="share-modal-backdrop" id="sharePageModal" role="dialog" aria-modal="true" aria-labelledby="sharePageTitle" onclick="closeSharePage(event)">
+    <div class="share-modal" onclick="event.stopPropagation()">
+      <h3 id="sharePageTitle">Share the VIPS Hub</h3>
+      <p>Scan the QR code or copy the link below.</p>
+      <div class="share-qr">
+        <img id="shareQrImage" alt="QR code linking to this VIPS Hub page">
+      </div>
+      <div class="share-link-box">
+        <input id="sharePageUrl" type="text" readonly aria-label="Shareable page link">
+        <button class="btn" type="button" onclick="copySharePageLink()">Copy Link</button>
+      </div>
+      <div class="share-status" id="sharePageStatus" aria-live="polite"></div>
+      <div class="share-modal-actions">
+        <button class="btn secondary" type="button" onclick="closeSharePage()">Close</button>
       </div>
     </div>
   </div>
@@ -1391,6 +1429,45 @@ document.addEventListener('keydown',function(event){
     if(modal) modal.classList.remove('show');
   }
 });
+
+
+function currentShareUrl(){
+  return window.location.href.split('#')[0];
+}
+function openSharePage(){
+  const modal=document.getElementById('sharePageModal');
+  const urlField=document.getElementById('sharePageUrl');
+  const qr=document.getElementById('shareQrImage');
+  const status=document.getElementById('sharePageStatus');
+  const url=currentShareUrl();
+  if(urlField) urlField.value=url;
+  if(qr) qr.src='https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data='+encodeURIComponent(url);
+  if(status) status.textContent='';
+  if(modal) modal.classList.add('show');
+}
+function closeSharePage(event){
+  if(event && event.target && event.target.id!=='sharePageModal') return;
+  const modal=document.getElementById('sharePageModal');
+  if(modal) modal.classList.remove('show');
+}
+async function copySharePageLink(){
+  const field=document.getElementById('sharePageUrl');
+  const status=document.getElementById('sharePageStatus');
+  if(!field) return;
+  try{
+    await navigator.clipboard.writeText(field.value);
+    if(status) status.textContent='Link copied!';
+  }catch(err){
+    field.focus();
+    field.select();
+    try{
+      document.execCommand('copy');
+      if(status) status.textContent='Link copied!';
+    }catch(e){
+      if(status) status.textContent='Select the link above and copy it manually.';
+    }
+  }
+}
 
 </script>
 </body>
