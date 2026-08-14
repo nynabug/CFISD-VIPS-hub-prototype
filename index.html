@@ -866,14 +866,17 @@ header h1{position:relative;z-index:1;margin-top:15px}
 }
 
 
+
+
+
 @media print{
-  body.printing-menu-image *{visibility:hidden!important}
-  body.printing-menu-image #menuImage,
-  body.printing-menu-image #menuImage .menu-viewer,
-  body.printing-menu-image #menuImage .menu-viewer img{
+  body.printing-schoolcafe-inline *{visibility:hidden!important}
+  body.printing-schoolcafe-inline #schoolcafe,
+  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card,
+  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card img{
     visibility:visible!important;
   }
-  body.printing-menu-image #menuImage{
+  body.printing-schoolcafe-inline #schoolcafe{
     position:absolute!important;
     left:0!important;
     top:0!important;
@@ -882,13 +885,18 @@ header h1{position:relative;z-index:1;margin-top:15px}
     margin:0!important;
     background:white!important;
   }
-  body.printing-menu-image #menuImage .menu-viewer{
+  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card{
     border:0!important;
     box-shadow:none!important;
+    padding:0!important;
   }
-  body.printing-menu-image #menuImage .menu-viewer img{
+  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card > *:not(img){
+    display:none!important;
+  }
+  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card img{
     width:100%!important;
     max-width:100%!important;
+    border:0!important;
   }
 }
 
@@ -1584,44 +1592,12 @@ For multi-day items, remove only after data-end-date has passed.
       <div class="menu-preview-card">
         <img src="ElemAug2026Menu.png" alt="August 2026 CFISD elementary school breakfast and lunch menu">
         <div class="menu-tools">
-          <button class="btn" type="button" onclick="showPanel('menuPdf')">Open / Save PDF</button>
-          <button class="btn secondary" type="button" onclick="showPanel('menuImage')">Open / Save Menu Image</button>
+          <button class="btn" type="button" onclick="shareMenuFile('ElemAug2026Menu.png','CFISD-Elementary-August-2026-Menu.png','image/png')">Share / Save Menu Image</button>
+          <button class="btn secondary" type="button" onclick="shareMenuFile('ElemAug2026Menu.pdf','CFISD-Elementary-August-2026-Menu.pdf','application/pdf')">Share / Save PDF</button>
           <button class="calendar-btn" type="button" onclick="printSchoolCafeMenu()">Print Menu</button>
         </div>
-        <div class="menu-helper">The PDF and image now open inside the Hub so you can return without leaving the app-style view. From the image page, press and hold the menu image to save it to Photos. The PDF page also includes an external-open option if your device needs it for sharing or printing.</div>
+        <div class="menu-helper">The menu stays on this page. On supported phones, “Share / Save” opens your device’s normal share sheet so you can save to Photos/Files, message it, or use other available actions without leaving the VIPS Hub.</div>
       </div>
-    </section>
-
-    <section id="menuPdf" class="panel">
-      <button class="back" onclick="showPanel('schoolcafe')">← Back to SchoolCafé</button>
-      <h2 class="section-title">📄 August 2026 Menu PDF</h2>
-
-      <div class="menu-viewer-actions">
-        <a class="btn" href="ElemAug2026Menu.pdf" target="_blank" rel="noopener" style="text-decoration:none">Open PDF Externally</a>
-        <button class="calendar-btn" type="button" onclick="showPanel('schoolcafe')">Back to SchoolCafé</button>
-      </div>
-
-      <div class="menu-viewer">
-        <iframe src="ElemAug2026Menu.pdf" title="August 2026 elementary menu PDF"></iframe>
-      </div>
-
-      <p class="menu-helper">If your device does not show the PDF correctly here, use “Open PDF Externally.” You can then use your device’s Share menu to save or print it, and return to the VIPS Hub from your Home Screen icon.</p>
-    </section>
-
-    <section id="menuImage" class="panel">
-      <button class="back" onclick="showPanel('schoolcafe')">← Back to SchoolCafé</button>
-      <h2 class="section-title">🖼️ August 2026 Menu</h2>
-
-      <div class="menu-viewer-actions">
-        <button class="btn" type="button" onclick="printSchoolCafeMenu()">Print Menu</button>
-        <button class="calendar-btn" type="button" onclick="showPanel('schoolcafe')">Back to SchoolCafé</button>
-      </div>
-
-      <div class="menu-viewer">
-        <img src="ElemAug2026Menu.png" alt="August 2026 CFISD elementary school breakfast and lunch menu">
-      </div>
-
-      <p class="menu-helper"><strong>Save to Photos:</strong> on iPhone/iPad, press and hold the menu image and choose the save/share option offered by your device.</p>
     </section>
 
     <section id="socials" class="panel">
@@ -2304,11 +2280,36 @@ function hidePastHubDates(referenceDate){
 
 
 function printSchoolCafeMenu(){
-  document.body.classList.add('printing-menu-image');
+  const img = document.querySelector('#schoolcafe .menu-preview-card img');
+  if(!img) return;
+  document.body.classList.add('printing-schoolcafe-inline');
   window.print();
   setTimeout(function(){
-    document.body.classList.remove('printing-menu-image');
+    document.body.classList.remove('printing-schoolcafe-inline');
   },500);
+}
+
+
+async function shareMenuFile(path, filename, mimeType){
+  try{
+    const response = await fetch(path, {cache:'no-store'});
+    if(!response.ok) throw new Error('File unavailable');
+    const blob = await response.blob();
+    const file = new File([blob], filename, {type:mimeType});
+
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      await navigator.share({
+        files:[file],
+        title:'McGown SchoolCafé Menu'
+      });
+      return;
+    }
+
+    // Fallback: open the file normally if native file sharing is unavailable.
+    window.open(path, '_blank');
+  }catch(err){
+    window.open(path, '_blank');
+  }
 }
 
 </script>
