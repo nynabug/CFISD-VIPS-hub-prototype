@@ -901,53 +901,76 @@ header h1{position:relative;z-index:1;margin-top:15px}
 }
 
 
+
+
+
 @media print{
   body.printing-schoolcafe-inline{
-    margin:0!important;
-    padding:0!important;
-    background:white!important;
+    margin:0 !important;
+    padding:0 !important;
+    background:#fff !important;
   }
-  body.printing-schoolcafe-inline *{
-    display:none!important;
+
+  body.printing-schoolcafe-inline header,
+  body.printing-schoolcafe-inline .bottomnav,
+  body.printing-schoolcafe-inline .toast,
+  body.printing-schoolcafe-inline .share-page-wrap,
+  body.printing-schoolcafe-inline .install-modal-backdrop,
+  body.printing-schoolcafe-inline .share-modal-backdrop{
+    display:none !important;
   }
-  body.printing-schoolcafe-inline #schoolcafe,
-  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card,
-  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card img{
-    display:block!important;
+
+  body.printing-schoolcafe-inline main > .panel{
+    display:none !important;
   }
+
   body.printing-schoolcafe-inline #schoolcafe{
-    position:static!important;
-    margin:0!important;
-    padding:0!important;
-    width:100%!important;
-    max-width:none!important;
-    border:0!important;
-    box-shadow:none!important;
-    background:white!important;
+    display:block !important;
+    position:static !important;
+    margin:0 !important;
+    padding:0 !important;
+    width:100% !important;
+    max-width:none !important;
+    border:0 !important;
+    box-shadow:none !important;
+    background:#fff !important;
   }
+
+  body.printing-schoolcafe-inline #schoolcafe > *{
+    display:none !important;
+  }
+
   body.printing-schoolcafe-inline #schoolcafe .menu-preview-card{
-    margin:0!important;
-    padding:0!important;
-    width:100%!important;
-    max-width:none!important;
-    border:0!important;
-    box-shadow:none!important;
-    background:white!important;
+    display:block !important;
+    margin:0 !important;
+    padding:0 !important;
+    width:100% !important;
+    max-width:none !important;
+    border:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    background:#fff !important;
   }
-  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card img{
-    margin:0 auto!important;
-    padding:0!important;
-    width:auto!important;
-    height:auto!important;
-    max-width:100%!important;
-    max-height:100vh!important;
-    border:0!important;
-    border-radius:0!important;
-    box-shadow:none!important;
-    object-fit:contain!important;
-    page-break-inside:avoid!important;
+
+  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card > *{
+    display:none !important;
   }
+
+  body.printing-schoolcafe-inline #schoolcafe .menu-preview-card > img{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    max-width:100% !important;
+    max-height:none !important;
+    margin:0 auto !important;
+    padding:0 !important;
+    border:0 !important;
+    border-radius:0 !important;
+    object-fit:contain !important;
+  }
+
   @page{
+    size:letter portrait;
     margin:0.25in;
   }
 }
@@ -2332,13 +2355,16 @@ function hidePastHubDates(referenceDate){
 
 
 function printSchoolCafeMenu(){
-  const img = document.querySelector('#schoolcafe .menu-preview-card img');
-  if(!img) return;
   document.body.classList.add('printing-schoolcafe-inline');
-  window.print();
-  setTimeout(function(){
-    document.body.classList.remove('printing-schoolcafe-inline');
-  },500);
+
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      window.print();
+      setTimeout(function(){
+        document.body.classList.remove('printing-schoolcafe-inline');
+      },1000);
+    });
+  });
 }
 
 
