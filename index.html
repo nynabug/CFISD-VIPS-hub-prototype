@@ -149,22 +149,6 @@ main{padding:16px}
   background:#182233;color:white;padding:10px 14px;border-radius:999px;
   font-size:13px;display:none;z-index:20;
 }
-.update-banner{
-  position:fixed;left:50%;transform:translateX(-50%) translateY(120%);
-  bottom:82px;width:min(480px,92%);
-  background:#182233;color:white;padding:12px 14px;border-radius:16px;
-  font-size:13px;display:flex;align-items:center;gap:10px;z-index:25;
-  box-shadow:0 10px 28px rgba(0,0,0,.28);
-  transition:transform .25s ease;
-}
-.update-banner.show{transform:translateX(-50%) translateY(0)}
-.update-banner span{flex:1;line-height:1.35}
-.update-banner button{
-  border:0;border-radius:999px;padding:8px 12px;font-weight:800;font-size:12.5px;
-  cursor:pointer;white-space:nowrap;
-}
-.update-banner .refresh-btn{background:var(--accent);color:white}
-.update-banner .dismiss-btn{background:rgba(255,255,255,.14);color:white}
 .search{
   width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;
   font-size:15px;margin-bottom:12px;
@@ -1331,7 +1315,7 @@ For multi-day items, remove only after data-end-date has passed.
           </div>
           <div class="date-actions"><button class="btn" onclick="window.open('https://gogandy.com/mcgown-elem-spirit-store-26ro','_blank')">Order Spirit Shirt</button><button class="calendar-btn" type="button" onclick="downloadCalendarEvent({title:'McGown Spirit Shirt Order Deadline',start:'20260904',allDay:true,details:'Deadline to order your McGown spirit shirt.'})">＋ Add to Calendar</button></div>
         </article>
-        <article class="dated-item date-item" data-category="weekend" data-date="2026-09-05" data-start-date="2026-09-05" data-end-date="2026-09-07">
+        <article class="dated-item date-item" data-category="weekend" data-date="2026-09-05" data-start-date="2026-09-15" data-end-date="2026-09-07">
           <div class="date-icon">🚗</div>
           <div class="date-main">
             <div class="date-topline"><span class="date-category">3-Day Weekend</span></div>
@@ -1740,11 +1724,6 @@ For multi-day items, remove only after data-end-date has passed.
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="update-banner" id="updateBanner" role="status" aria-live="polite">
-  <span>A newer version of the VIPS Hub is available.</span>
-  <button class="refresh-btn" type="button" onclick="applyVipsUpdate()">Refresh</button>
-  <button class="dismiss-btn" type="button" onclick="dismissVipsUpdate()">Later</button>
-</div>
 
 <script>
 let activeFilter='all';
@@ -2147,32 +2126,12 @@ async function copySharePageLink(){
 }
 
 
-/* Prototype freshness helper
-   Previously this force-reloaded the page the moment new content was
-   detected, even mid-visit. That's disruptive and can lose someone's
-   place, so it now shows a dismissible "Refresh" banner instead.
-
-   IMPORTANT: it compares the freshly-fetched page text against a stored
-   baseline copy (localStorage), NOT against document.documentElement.outerHTML.
-   Comparing to outerHTML was the original bug — browsers re-serialize
-   HTML when parsing it into the DOM (attribute order, quoting, whitespace
-   all shift), so that comparison reads as "different" even when nothing
-   actually changed, making the banner appear immediately and stay stuck. */
+/* Prototype freshness helper */
 let vipsLastFreshnessCheck = 0;
-let vipsPendingReloadUrl = null;
-
-function normalizeVipsHtml(html){
-  return html.replace(/\?(fresh|v)=\d+/g,'').replace(/\s+/g,' ').trim();
-}
-
 async function checkForVipsUpdate(){
   const now = Date.now();
   if(now - vipsLastFreshnessCheck < 15000) return;
   vipsLastFreshnessCheck = now;
-
-  // Don't nag again this session if the person already dismissed it.
-  if(sessionStorage.getItem('vipsUpdateDismissed') === '1') return;
-
   try{
     const baseUrl = window.location.href.split('#')[0].split('?')[0];
     const response = await fetch(baseUrl + '?fresh=' + now, {
@@ -2180,45 +2139,18 @@ async function checkForVipsUpdate(){
       headers:{'Cache-Control':'no-cache'}
     });
     if(!response.ok) return;
-    const latest = normalizeVipsHtml(await response.text());
-
-    const knownKey = 'vipsKnownContent';
-    const known = localStorage.getItem(knownKey);
-
-    if(known === null){
-      // First time we've ever checked on this device — just record the
-      // baseline, nothing to compare against yet.
-      localStorage.setItem(knownKey, latest);
-      return;
-    }
-
-    if(latest !== known){
-      // Update the baseline right away so repeated checks don't keep
-      // re-triggering the banner while the person decides what to do.
-      localStorage.setItem(knownKey, latest);
-      vipsPendingReloadUrl = baseUrl + '?v=' + now;
-      showVipsUpdateBanner();
+    const latest = await response.text();
+    const normalize = html => html.replace(/\?fresh=\d+/g,'').replace(/\s+/g,' ').trim();
+    if(normalize(latest) !== normalize(document.documentElement.outerHTML)){
+      const key='vipsFreshReload';
+      const lastReload=Number(sessionStorage.getItem(key)||0);
+      if(now-lastReload>30000){
+        sessionStorage.setItem(key,String(now));
+        window.location.replace(baseUrl+'?v='+now);
+      }
     }
   }catch(e){}
 }
-
-function showVipsUpdateBanner(){
-  const banner = document.getElementById('updateBanner');
-  if(banner) banner.classList.add('show');
-}
-
-function applyVipsUpdate(){
-  if(vipsPendingReloadUrl) window.location.replace(vipsPendingReloadUrl);
-}
-
-function dismissVipsUpdate(){
-  const banner = document.getElementById('updateBanner');
-  if(banner) banner.classList.remove('show');
-  // Stay quiet for the rest of this tab session; a real reload later
-  // (new visit / new tab) will pick up the update naturally.
-  sessionStorage.setItem('vipsUpdateDismissed', '1');
-}
-
 window.addEventListener('pageshow',()=>setTimeout(checkForVipsUpdate,400));
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible') setTimeout(checkForVipsUpdate,400);
