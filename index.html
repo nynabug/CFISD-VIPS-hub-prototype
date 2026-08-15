@@ -2149,12 +2149,21 @@ async function copySharePageLink(){
 
 /* Prototype freshness helper
    Previously this force-reloaded the page the moment new content was
-   detected, even mid-visit (e.g. right as a parent was filling out a
-   filter or about to tap Sign Up). That's disruptive and can lose their
-   place. Now it just surfaces a dismissible "Refresh" banner and lets
-   the person choose when to reload. */
+   detected, even mid-visit. That's disruptive and can lose someone's
+   place, so it now shows a dismissible "Refresh" banner instead.
+
+   IMPORTANT: it compares the freshly-fetched page text against a stored
+   baseline copy (localStorage), NOT against document.documentElement.outerHTML.
+   Comparing to outerHTML was the original bug — browsers re-serialize
+   HTML when parsing it into the DOM (attribute order, quoting, whitespace
+   all shift), so that comparison reads as "different" even when nothing
+   actually changed, making the banner appear immediately and stay stuck. */
 let vipsLastFreshnessCheck = 0;
 let vipsPendingReloadUrl = null;
+
+function normalizeVipsHtml(html){
+  return html.replace(/\?(fresh|v)=\d+/g,'').replace(/\s+/g,' ').trim();
+}
 
 async function checkForVipsUpdate(){
   const now = Date.now();
@@ -2171,9 +2180,22 @@ async function checkForVipsUpdate(){
       headers:{'Cache-Control':'no-cache'}
     });
     if(!response.ok) return;
-    const latest = await response.text();
-    const normalize = html => html.replace(/\?fresh=\d+/g,'').replace(/\s+/g,' ').trim();
-    if(normalize(latest) !== normalize(document.documentElement.outerHTML)){
+    const latest = normalizeVipsHtml(await response.text());
+
+    const knownKey = 'vipsKnownContent';
+    const known = localStorage.getItem(knownKey);
+
+    if(known === null){
+      // First time we've ever checked on this device — just record the
+      // baseline, nothing to compare against yet.
+      localStorage.setItem(knownKey, latest);
+      return;
+    }
+
+    if(latest !== known){
+      // Update the baseline right away so repeated checks don't keep
+      // re-triggering the banner while the person decides what to do.
+      localStorage.setItem(knownKey, latest);
       vipsPendingReloadUrl = baseUrl + '?v=' + now;
       showVipsUpdateBanner();
     }
