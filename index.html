@@ -1580,6 +1580,9 @@ let activeFilter='all';
 function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  // Always apply Volunteer Now filters when the page opens so archived past events
+  // are hidden immediately unless Show Past Events is explicitly enabled.
+  if(id === 'opportunities') applyOpportunityFilters();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function navTo(btn,id){
