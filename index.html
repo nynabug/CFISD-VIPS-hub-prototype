@@ -2328,6 +2328,21 @@ async function shareCurrentSchoolCafeFile(kind){
     ? currentSchoolCafeMenu.menuPdf
     : currentSchoolCafeMenu.menuImage;
   if(!path) return;
+
+  // iOS/iPadOS Home Screen web apps can stall when a PDF is fetched first and
+  // then passed to the native share sheet. Open the PDF immediately from the
+  // user's tap instead; because the Drive URL is external, iOS hands it off to
+  // Safari, where the normal Share/Save controls are available.
+  const isStandaloneWebApp =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+
+  if(kind === 'pdf' && isStandaloneWebApp){
+    const opened = window.open(path, '_blank');
+    if(!opened) window.location.href = path;
+    return;
+  }
+
   const mimeType = kind === 'pdf' ? 'application/pdf' : 'image/jpeg';
   await shareMenuFile(path, schoolCafeFilename(kind), mimeType);
 }
