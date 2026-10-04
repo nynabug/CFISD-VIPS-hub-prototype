@@ -1532,14 +1532,14 @@ For multi-day items, remove only after data-end-date has passed.
 <button class="btn secondary" onclick="window.open('https://apps.apple.com/us/app/schoolcaf%C3%A9/id1134802301','_blank')" type="button">SchoolCafé - Lunch Money and Menus (Apple App Store)</button>
 </div>
 <h3 style="margin:0 0 9px;color:var(--accent-dark)">This Month’s Menu:</h3>
-<div class="menu-preview-card">
-<img alt="September 2026 CFISD elementary school breakfast and lunch menu" src="ElemSep2026Menu.png"/>
+<div class="menu-preview-card" id="schoolCafeMenuCard">
+<img id="schoolCafeMenuImage" alt="Current CFISD elementary school breakfast and lunch menu" src="ElemSep2026Menu.png"/>
 <div class="menu-tools">
-<button class="btn" onclick="shareMenuFile('ElemSep2026Menu.png','CFISD-Elementary-September-2026-Menu.png','image/png')" type="button">Share / Save Menu Image</button>
-<button class="btn secondary" onclick="shareMenuFile('ElemSep2026Menu.pdf','CFISD-Elementary-September-2026-Menu.pdf','application/pdf')" type="button">Share / Save PDF</button>
-<button class="calendar-btn" onclick="printSchoolCafeMenu()" type="button">Print Menu</button>
+<button class="btn" id="schoolCafeShareImageButton" onclick="shareCurrentSchoolCafeFile('image')" type="button">Share / Save Menu Image</button>
+<button class="btn secondary" id="schoolCafeSharePdfButton" onclick="shareCurrentSchoolCafeFile('pdf')" type="button">Share / Save PDF</button>
+<button class="calendar-btn" id="schoolCafePrintButton" onclick="printSchoolCafeMenu()" type="button">Print Menu</button>
 </div>
-<div class="menu-helper">The menu stays on this page. On supported phones, “Share / Save” opens your device’s normal share sheet so you can save to Photos/Files, message it, or use other available actions without leaving the VIPS Hub.</div>
+<div class="menu-helper" id="schoolCafeMenuHelper">The menu stays on this page. On supported phones, “Share / Save” opens your device’s normal share sheet so you can save to Photos/Files, message it, or use other available actions without leaving the VIPS Hub.</div>
 </div>
 </section>
 <section class="panel" id="socials">
@@ -2250,6 +2250,91 @@ function hidePastHubDates(referenceDate){
 }
 
 
+
+/* SchoolCafe monthly menu — loaded from the VIPS Hub backend.
+   Static September assets remain as a graceful fallback if the backend is unavailable. */
+const VIPS_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbykY-BIDOzbmJLhdGVfd4dNcjdi4RSz31G-gDS4pIO-82JI8NtLOSDW7SOYd6rOEGQbGg/exec';
+const SCHOOLCAFE_STATIC_FALLBACK = {
+  month: 'September',
+  year: '2026',
+  menuPdf: 'ElemSep2026Menu.pdf',
+  menuImage: 'ElemSep2026Menu.png',
+  active: true
+};
+let currentSchoolCafeMenu = Object.assign({}, SCHOOLCAFE_STATIC_FALLBACK);
+
+function schoolCafeField(row, names){
+  for(const name of names){
+    if(row && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== ''){
+      return row[name];
+    }
+  }
+  return '';
+}
+
+function normalizeSchoolCafeRecord(row){
+  if(!row) return null;
+  return {
+    id: schoolCafeField(row,['ID','id']),
+    month: schoolCafeField(row,['Month','month']),
+    year: schoolCafeField(row,['Year','year']),
+    menuPdf: schoolCafeField(row,['Menu PDF','menuPdf','menuPdfUrl']),
+    menuImage: schoolCafeField(row,['Menu Image','menuImage','menuImageUrl']),
+    active: String(schoolCafeField(row,['Active','active'])).toLowerCase() === 'true' ||
+            schoolCafeField(row,['Active','active']) === true
+  };
+}
+
+function applySchoolCafeMenu(menu){
+  if(!menu || !menu.active || !menu.menuPdf || !menu.menuImage) return false;
+
+  currentSchoolCafeMenu = menu;
+
+  const image = document.getElementById('schoolCafeMenuImage');
+  if(image){
+    image.src = menu.menuImage;
+    image.alt = (menu.month && menu.year)
+      ? menu.month + ' ' + menu.year + ' CFISD elementary school breakfast and lunch menu'
+      : 'Current CFISD elementary school breakfast and lunch menu';
+  }
+  return true;
+}
+
+async function loadSchoolCafeMenu(){
+  try{
+    const response = await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(), {cache:'no-store'});
+    if(!response.ok) throw new Error('Backend unavailable');
+    const payload = await response.json();
+    const rows = payload && Array.isArray(payload.schoolCafe) ? payload.schoolCafe : [];
+    const normalized = rows.map(normalizeSchoolCafeRecord).filter(Boolean);
+    const menu = normalized.find(item => item.id === 'current-menu') ||
+                 normalized.find(item => item.active);
+    applySchoolCafeMenu(menu);
+  }catch(error){
+    // Keep the known-good static menu already rendered in the page.
+    currentSchoolCafeMenu = Object.assign({}, SCHOOLCAFE_STATIC_FALLBACK);
+  }
+}
+
+function schoolCafeFilename(kind){
+  const month = currentSchoolCafeMenu.month || 'Current';
+  const year = currentSchoolCafeMenu.year || '';
+  const base = 'CFISD-Elementary-' + month + (year ? '-' + year : '') + '-Menu';
+  return kind === 'pdf' ? base + '.pdf' : base + '.jpg';
+}
+
+async function shareCurrentSchoolCafeFile(kind){
+  const path = kind === 'pdf'
+    ? currentSchoolCafeMenu.menuPdf
+    : currentSchoolCafeMenu.menuImage;
+  if(!path) return;
+  const mimeType = kind === 'pdf' ? 'application/pdf' : 'image/jpeg';
+  await shareMenuFile(path, schoolCafeFilename(kind), mimeType);
+}
+
+document.addEventListener('DOMContentLoaded', loadSchoolCafeMenu);
+
+
 function printSchoolCafeMenu(){
   const oldFrame = document.getElementById('schoolCafePrintFrame');
   if(oldFrame) oldFrame.remove();
@@ -2275,7 +2360,7 @@ function printSchoolCafeMenu(){
     <html>
       <head>
         <meta charset="utf-8">
-        <title>August 2026 Elementary Menu</title>
+        <title>${(currentSchoolCafeMenu.month || 'Current') + ' ' + (currentSchoolCafeMenu.year || '')} Elementary Menu</title>
         <style>
           @page {
             size: Letter portrait;
@@ -2304,7 +2389,7 @@ function printSchoolCafeMenu(){
         </style>
       </head>
       <body>
-        <img id="printMenuImage" src="ElemSep2026Menu.png" alt="September 2026 elementary school menu">
+        <img id="printMenuImage" src="${currentSchoolCafeMenu.menuImage}" alt="${(currentSchoolCafeMenu.month || 'Current') + ' ' + (currentSchoolCafeMenu.year || '')} elementary school menu">
       </body>
     </html>
   `);
