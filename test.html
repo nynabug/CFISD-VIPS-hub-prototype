@@ -2263,6 +2263,102 @@ async function loadNews(){
 document.addEventListener('DOMContentLoaded', loadNews);
 
 
+/* Featured Items — backend-driven public test.
+   Existing Featured markup remains as a graceful fallback if the backend is unavailable. */
+const FEATURED_STATIC_HTML = (() => {
+  const reel = document.getElementById('featuredReel');
+  const dots = document.querySelector('.featured-dots');
+  return { reel: reel ? reel.innerHTML : '', dots: dots ? dots.innerHTML : '' };
+})();
+
+function featuredField(row, names){
+  for(const name of names){
+    if(row && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') return row[name];
+  }
+  return '';
+}
+
+function normalizeFeaturedRecord(row){
+  if(!row) return null;
+  const activeRaw=featuredField(row,['Active','active']);
+  return {
+    id:String(featuredField(row,['ID','id'])||'').trim(),
+    title:String(featuredField(row,['Title','title'])||'').trim(),
+    subcommitteeId:String(featuredField(row,['Subcommittee ID','subcommitteeId'])||'').trim(),
+    description:String(featuredField(row,['Description','description'])||'').trim(),
+    startDate:normalizeBackendDate(featuredField(row,['Start Date','startDate'])),
+    endDate:normalizeBackendDate(featuredField(row,['End Date','endDate'])),
+    buttonText:String(featuredField(row,['Button Text','buttonText'])||'').trim(),
+    buttonLink:String(featuredField(row,['Button Link','buttonLink'])||'').trim(),
+    image:String(featuredField(row,['Image','image'])||'').trim(),
+    active:activeRaw===true || String(activeRaw).toLowerCase()==='true'
+  };
+}
+
+function featuredIsCurrent(item){
+  if(!item || !item.active || !item.title) return false;
+  const today=new Date(); today.setHours(0,0,0,0);
+  if(item.startDate){ const start=parseLocalDate(item.startDate); if(start && start>today) return false; }
+  if(item.endDate){ const end=parseLocalDate(item.endDate); if(end && end<today) return false; }
+  return true;
+}
+
+function featuredEmoji(item){
+  const text=(item.subcommitteeId+' '+item.title).toLowerCase();
+  if(text.includes('yearbook') || text.includes('photo')) return '📸';
+  if(text.includes('garden')) return '🌱';
+  if(text.includes('library')) return '📚';
+  return '⭐';
+}
+
+function renderBackendFeatured(items){
+  const reel=document.getElementById('featuredReel');
+  const dots=document.querySelector('.featured-dots');
+  if(!reel || !dots) return;
+  reel.innerHTML=''; dots.innerHTML=''; featuredIndex=0;
+  items.forEach((item,index)=>{
+    const article=document.createElement('article');
+    article.className='featured-slide' + (index%2===0 ? ' purple' : ' blue');
+    if(item.image){
+      const img=document.createElement('img'); img.className='featured-image'; img.src=item.image; img.alt=item.title; article.appendChild(img);
+    }else{
+      const ph=document.createElement('div'); ph.className='featured-placeholder';
+      const inner=document.createElement('div'); const big=document.createElement('span'); big.className='big'; big.textContent=featuredEmoji(item);
+      const label=document.createElement('strong'); label.textContent=item.title;
+      inner.appendChild(big); inner.appendChild(label); ph.appendChild(inner); article.appendChild(ph);
+    }
+    const body=document.createElement('div'); body.className='featured-body';
+    const h=document.createElement('h3'); h.textContent=item.title; body.appendChild(h);
+    if(item.description){ const p=document.createElement('p'); p.textContent=item.description; body.appendChild(p); }
+    if(item.buttonText && item.buttonLink){
+      const actions=document.createElement('div'); actions.className='featured-actions';
+      const btn=document.createElement('button'); btn.className='btn'; btn.type='button'; btn.textContent=item.buttonText;
+      btn.addEventListener('click',()=>window.open(item.buttonLink,'_blank'));
+      actions.appendChild(btn); body.appendChild(actions);
+    }
+    article.appendChild(body); reel.appendChild(article);
+    const dot=document.createElement('button'); dot.className='featured-dot'+(index===0?' active':''); dot.type='button';
+    dot.setAttribute('aria-label','Featured item '+(index+1)); dot.addEventListener('click',()=>goFeatured(index)); dots.appendChild(dot);
+  });
+}
+
+async function loadFeatured(){
+  try{
+    const response=await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(),{cache:'no-store'});
+    if(!response.ok) throw new Error('Backend unavailable');
+    const payload=await response.json();
+    const rows=payload && Array.isArray(payload.featured) ? payload.featured : [];
+    const items=rows.map(normalizeFeaturedRecord).filter(featuredIsCurrent);
+    if(items.length) renderBackendFeatured(items);
+  }catch(error){
+    const reel=document.getElementById('featuredReel'); const dots=document.querySelector('.featured-dots');
+    if(reel && !reel.innerHTML.trim()) reel.innerHTML=FEATURED_STATIC_HTML.reel;
+    if(dots && !dots.innerHTML.trim()) dots.innerHTML=FEATURED_STATIC_HTML.dots;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadFeatured);
+
 /* Upcoming Dates — backend-driven public test.
    The existing hard-coded date list remains in the HTML as a graceful fallback.
    When the backend responds successfully, active current/future Events replace it. */
