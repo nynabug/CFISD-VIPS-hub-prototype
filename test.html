@@ -1536,7 +1536,7 @@ For multi-day items, remove only after data-end-date has passed.
 <img id="schoolCafeMenuImage" alt="Current CFISD elementary school breakfast and lunch menu" src="ElemSep2026Menu.png"/>
 <div class="menu-tools">
 <button class="btn" id="schoolCafeShareImageButton" onclick="shareCurrentSchoolCafeFile('image')" type="button">Share / Save Menu Image</button>
-<button class="btn secondary" id="schoolCafeSharePdfButton" onclick="shareCurrentSchoolCafeFile('pdf')" type="button">Share / Save PDF</button>
+<a class="btn secondary" id="schoolCafeSharePdfButton" href="ElemSep2026Menu.pdf" target="_blank" rel="noopener external">Share / Save PDF</a>
 <button class="calendar-btn" id="schoolCafePrintButton" onclick="printSchoolCafeMenu()" type="button">Print Menu</button>
 </div>
 <div class="menu-helper" id="schoolCafeMenuHelper">The menu stays on this page. On supported phones, “Share / Save” opens your device’s normal share sheet so you can save to Photos/Files, message it, or use other available actions without leaving the VIPS Hub.</div>
@@ -2297,6 +2297,15 @@ function applySchoolCafeMenu(menu){
       ? menu.month + ' ' + menu.year + ' CFISD elementary school breakfast and lunch menu'
       : 'Current CFISD elementary school breakfast and lunch menu';
   }
+
+  // Keep the PDF action as a real browser link instead of a JavaScript-driven
+  // download/share action. This is intentional: iOS Home Screen web apps handle
+  // a direct user-tapped external link more reliably and can hand it to Safari
+  // without navigating the Hub itself away from its current state.
+  const pdfLink = document.getElementById('schoolCafeSharePdfButton');
+  if(pdfLink){
+    pdfLink.href = menu.menuPdf;
+  }
   return true;
 }
 
@@ -2338,9 +2347,8 @@ async function shareCurrentSchoolCafeFile(kind){
     window.navigator.standalone === true;
 
   if(kind === 'pdf' && isStandaloneWebApp){
-    // In iOS/iPadOS standalone mode, avoid fetch(), Web Share, and window.open().
-    // Navigate directly from the user's tap so the system can hand the PDF URL off.
-    window.location.assign(path);
+    const opened = window.open(path, '_blank');
+    if(!opened) window.location.href = path;
     return;
   }
 
