@@ -987,7 +987,7 @@ For multi-day items, remove only after data-end-date has passed.
 <span id="newsBannerDescription">For official updates and events from McGown, be sure to review the latest News From the Nest. Note that official school events and VIPS events are managed separately.</span>
 </div>
 </div>
-<div class="featured-wrap">
+<div class="featured-wrap" id="featuredWrap">
 <div class="featured-head">
 <strong>Featured</strong>
 <div class="featured-controls">
@@ -2312,9 +2312,11 @@ function featuredEmoji(item){
 }
 
 function renderBackendFeatured(items){
+  const wrap=document.getElementById('featuredWrap');
   const reel=document.getElementById('featuredReel');
   const dots=document.querySelector('.featured-dots');
   if(!reel || !dots) return;
+  if(wrap) wrap.style.display='';
   reel.innerHTML=''; dots.innerHTML=''; featuredIndex=0;
   items.forEach((item,index)=>{
     const article=document.createElement('article');
@@ -2349,11 +2351,22 @@ async function loadFeatured(){
     const payload=await response.json();
     const rows=payload && Array.isArray(payload.featured) ? payload.featured : [];
     const items=rows.map(normalizeFeaturedRecord).filter(featuredIsCurrent);
-    if(items.length) renderBackendFeatured(items);
+    const wrap=document.getElementById('featuredWrap');
+    if(items.length){
+      renderBackendFeatured(items);
+    }else{
+      // A successful backend response with zero eligible Featured items is intentional.
+      // Hide the whole section rather than reviving the static fallback.
+      if(wrap) wrap.style.display='none';
+    }
   }catch(error){
-    const reel=document.getElementById('featuredReel'); const dots=document.querySelector('.featured-dots');
-    if(reel && !reel.innerHTML.trim()) reel.innerHTML=FEATURED_STATIC_HTML.reel;
-    if(dots && !dots.innerHTML.trim()) dots.innerHTML=FEATURED_STATIC_HTML.dots;
+    // Only a genuine backend failure should use the static Featured fallback.
+    const wrap=document.getElementById('featuredWrap');
+    const reel=document.getElementById('featuredReel');
+    const dots=document.querySelector('.featured-dots');
+    if(wrap) wrap.style.display='';
+    if(reel) reel.innerHTML=FEATURED_STATIC_HTML.reel;
+    if(dots) dots.innerHTML=FEATURED_STATIC_HTML.dots;
   }
 }
 
