@@ -2313,7 +2313,7 @@ function renderBackendVolunteers(items){
     cards.appendChild(card);
   });
   const summary=document.querySelector('#opportunities .filter-summary'); if(summary) summary.lastChild.textContent=' volunteer opportunities shown';
-  const note=document.querySelector('#opportunities .info-card'); if(note){ note.querySelector('strong').textContent='🙌 Current volunteer opportunities'; note.querySelector('span').textContent='These listings are managed through the VIPS Hub Admin Dashboard.'; }
+  // Keep the yellow Volunteer Opportunities testing banner unchanged while backend records render.
   updateFavoriteUI(); applyOpportunityFilters();
 }
 function escapeVolunteerHtml(value){
