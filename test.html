@@ -2122,6 +2122,7 @@ function downloadCalendarEvent(eventData){
 
 
 function filterUpcomingDates(category, button){
+  currentUpcomingDateFilter = category || 'all';
   document.querySelectorAll('#calendar .date-filter-btn').forEach(btn=>btn.classList.remove('active'));
   if(button) button.classList.add('active');
   let visible=0;
@@ -2260,6 +2261,182 @@ async function loadNews(){
 }
 
 document.addEventListener('DOMContentLoaded', loadNews);
+
+
+/* Upcoming Dates — backend-driven public test.
+   The existing hard-coded date list remains in the HTML as a graceful fallback.
+   When the backend responds successfully, active current/future Events replace it. */
+const UPCOMING_DATES_STATIC_HTML = (() => {
+  const list = document.getElementById('upcomingDateList');
+  return list ? list.innerHTML : '';
+})();
+let currentUpcomingDateFilter = 'all';
+
+function eventField(row, names){
+  for(const name of names){
+    if(row && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') return row[name];
+  }
+  return '';
+}
+
+function normalizeBackendDate(value){
+  if(!value) return '';
+  const raw = String(value).trim();
+  let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(match) return `${match[1]}-${match[2]}-${match[3]}`;
+  match = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(match) return `${match[3]}-${String(match[1]).padStart(2,'0')}-${String(match[2]).padStart(2,'0')}`;
+  const parsed = new Date(raw);
+  if(!Number.isNaN(parsed.getTime())){
+    const y=parsed.getFullYear(), m=String(parsed.getMonth()+1).padStart(2,'0'), d=String(parsed.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  return '';
+}
+
+function normalizeEventRecord(row){
+  if(!row) return null;
+  const activeRaw = eventField(row,['Active','active']);
+  const calendarRaw = eventField(row,['Calendar','calendar']);
+  return {
+    id: String(eventField(row,['ID','id']) || '').trim(),
+    title: String(eventField(row,['Title','title']) || '').trim(),
+    description: String(eventField(row,['Description','description']) || '').trim(),
+    startDate: normalizeBackendDate(eventField(row,['Start Date','startDate'])),
+    startTime: String(eventField(row,['Start Time','startTime']) || '').trim(),
+    endDate: normalizeBackendDate(eventField(row,['End Date','endDate'])),
+    endTime: String(eventField(row,['End Time','endTime']) || '').trim(),
+    category: String(eventField(row,['Category','category']) || '').trim(),
+    location: String(eventField(row,['Location','location']) || '').trim(),
+    calendar: calendarRaw === true || String(calendarRaw).toLowerCase() === 'true',
+    active: activeRaw === true || String(activeRaw).toLowerCase() === 'true'
+  };
+}
+
+function upcomingCategoryKey(category){
+  const c=String(category||'').trim().toLowerCase();
+  if(c.includes('vips')) return 'vips';
+  if(c.includes('extended break') || c === 'break') return 'break';
+  if(c.includes('3-day') || c.includes('weekend')) return 'weekend';
+  if(c.includes('picture') || c.includes('portrait')) return 'picture';
+  if(c.includes('deadline')) return 'deadline';
+  return 'school';
+}
+
+function upcomingCategoryIcon(key){
+  return ({vips:'🦉',school:'🏫',break:'🧳',weekend:'🚗',picture:'📸',deadline:'📋'})[key] || '📅';
+}
+
+function parseLocalDate(iso){
+  if(!iso) return null;
+  const parts=iso.split('-').map(Number);
+  return new Date(parts[0],parts[1]-1,parts[2],12,0,0);
+}
+
+function formatEventDateRange(event){
+  const start=parseLocalDate(event.startDate);
+  const end=parseLocalDate(event.endDate || event.startDate);
+  if(!start) return '';
+  const same=start.getFullYear()===end.getFullYear() && start.getMonth()===end.getMonth() && start.getDate()===end.getDate();
+  let text='';
+  if(same){
+    text=start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  }else if(start.getFullYear()===end.getFullYear() && start.getMonth()===end.getMonth()){
+    text=`${start.toLocaleDateString('en-US',{month:'long'})} ${start.getDate()}–${end.getDate()}, ${start.getFullYear()}`;
+  }else{
+    text=`${start.toLocaleDateString('en-US',{month:'long',day:'numeric'})}–${end.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
+  }
+  const timeBits=[];
+  if(event.startTime) timeBits.push(event.startTime);
+  if(event.endTime) timeBits.push(event.endTime);
+  if(timeBits.length) text += ` • ${timeBits.join('–')}`;
+  return text;
+}
+
+function compactCalendarDate(iso, time){
+  if(!iso) return '';
+  const date=iso.replace(/-/g,'');
+  if(!time) return date;
+  const m=String(time).trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
+  if(!m) return date;
+  let h=Number(m[1]); const min=m[2]; const ap=(m[3]||'').toUpperCase();
+  if(ap==='PM' && h<12) h+=12;
+  if(ap==='AM' && h===12) h=0;
+  return `${date}T${String(h).padStart(2,'0')}${min}00`;
+}
+
+function addOneDayIso(iso){
+  const d=parseLocalDate(iso); if(!d) return '';
+  d.setDate(d.getDate()+1);
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function renderBackendUpcomingDates(events){
+  const list=document.getElementById('upcomingDateList');
+  if(!list) return;
+  list.innerHTML='';
+  events.forEach(event=>{
+    const key=upcomingCategoryKey(event.category);
+    const article=document.createElement('article');
+    article.className='dated-item date-item';
+    article.dataset.category=key;
+    article.dataset.date=event.startDate;
+    article.dataset.startDate=event.startDate;
+    article.dataset.endDate=event.endDate || event.startDate;
+
+    const icon=document.createElement('div');
+    icon.className='date-icon'; icon.textContent=upcomingCategoryIcon(key);
+    article.appendChild(icon);
+
+    const main=document.createElement('div'); main.className='date-main';
+    const topline=document.createElement('div'); topline.className='date-topline';
+    const cat=document.createElement('span'); cat.className='date-category'; cat.textContent=event.category || 'School Date';
+    topline.appendChild(cat); main.appendChild(topline);
+    const title=document.createElement('h3'); title.className='date-title'; title.textContent=event.title; main.appendChild(title);
+    const meta=document.createElement('div'); meta.className='date-meta';
+    const strong=document.createElement('strong'); strong.textContent=formatEventDateRange(event); meta.appendChild(strong);
+    if(event.description){ meta.appendChild(document.createElement('br')); meta.appendChild(document.createTextNode(event.description)); }
+    if(event.location){ meta.appendChild(document.createElement('br')); meta.appendChild(document.createTextNode(event.location)); }
+    main.appendChild(meta); article.appendChild(main);
+
+    if(event.calendar){
+      const actions=document.createElement('div'); actions.className='date-actions';
+      const btn=document.createElement('button'); btn.className='calendar-btn'; btn.type='button'; btn.textContent='＋ Add to Calendar';
+      btn.addEventListener('click',()=>{
+        const allDay=!event.startTime && !event.endTime;
+        const start=compactCalendarDate(event.startDate,event.startTime);
+        let end='';
+        if(allDay) end=addOneDayIso(event.endDate || event.startDate);
+        else if(event.endDate || event.endTime) end=compactCalendarDate(event.endDate || event.startDate,event.endTime);
+        downloadCalendarEvent({title:event.title,start,end,allDay,location:event.location,details:event.description});
+      });
+      actions.appendChild(btn); article.appendChild(actions);
+    }
+    list.appendChild(article);
+  });
+  filterUpcomingDates(currentUpcomingDateFilter);
+}
+
+async function loadUpcomingDates(){
+  try{
+    const response=await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(),{cache:'no-store'});
+    if(!response.ok) throw new Error('Backend unavailable');
+    const payload=await response.json();
+    const rows=payload && Array.isArray(payload.events) ? payload.events : [];
+    const today=new Date(); today.setHours(0,0,0,0);
+    const events=rows.map(normalizeEventRecord).filter(Boolean).filter(event=>{
+      if(!event.active || !event.title || !event.startDate) return false;
+      const end=parseLocalDate(event.endDate || event.startDate);
+      return end && end >= today;
+    }).sort((a,b)=>a.startDate.localeCompare(b.startDate) || a.title.localeCompare(b.title));
+    renderBackendUpcomingDates(events);
+  }catch(error){
+    const list=document.getElementById('upcomingDateList');
+    if(list && !list.innerHTML.trim()) list.innerHTML=UPCOMING_DATES_STATIC_HTML;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadUpcomingDates);
 const SCHOOLCAFE_STATIC_FALLBACK = {
   month: 'September',
   year: '2026',
