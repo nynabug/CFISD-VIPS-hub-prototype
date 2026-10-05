@@ -2514,7 +2514,10 @@ document.addEventListener('DOMContentLoaded', loadFeatured);
    When the backend responds successfully, active current/future Events replace it. */
 const UPCOMING_DATES_STATIC_HTML = (() => {
   const list = document.getElementById('upcomingDateList');
-  return list ? list.innerHTML : '';
+  const html = list ? list.innerHTML : '';
+  // Prevent stale hard-coded dates from flashing while the live backend loads.
+  if(list) list.style.display = 'none';
+  return html;
 })();
 let currentUpcomingDateFilter = 'all';
 
@@ -2661,6 +2664,8 @@ function renderBackendUpcomingDates(events){
     list.appendChild(article);
   });
   filterUpcomingDates(currentUpcomingDateFilter);
+  // Reveal only after the backend-compliant list has been rendered.
+  list.style.display = '';
 }
 
 async function loadUpcomingDates(){
@@ -2678,7 +2683,12 @@ async function loadUpcomingDates(){
     renderBackendUpcomingDates(events);
   }catch(error){
     const list=document.getElementById('upcomingDateList');
-    if(list && !list.innerHTML.trim()) list.innerHTML=UPCOMING_DATES_STATIC_HTML;
+    if(list){
+      // A genuine backend failure is the only time the static list is shown.
+      list.innerHTML=UPCOMING_DATES_STATIC_HTML;
+      filterUpcomingDates(currentUpcomingDateFilter);
+      list.style.display='';
+    }
   }
 }
 
