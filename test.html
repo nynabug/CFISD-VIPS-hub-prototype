@@ -980,11 +980,11 @@ For multi-day items, remove only after data-end-date has passed.
 </header>
 <main>
 <section class="panel active" id="home">
-<div class="news-banner" onclick="window.open('https://app.smore.com/n/db369','_blank')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){window.open('https://app.smore.com/n/db369','_blank')}" aria-label="Open the latest News From the Nest">
+<div class="news-banner" id="newsBanner" onclick="openCurrentNews()" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCurrentNews();}" aria-label="Open the latest News From the Nest">
 <div class="news-banner-icon">📰</div>
 <div class="news-banner-copy">
-<strong>Latest News From the Nest ↗</strong>
-<span>For official updates and events from McGown, be sure to review the latest News From the Nest. Note that official school events and VIPS events are managed separately.</span>
+<strong id="newsBannerTitle">Latest News From the Nest ↗</strong>
+<span id="newsBannerDescription">For official updates and events from McGown, be sure to review the latest News From the Nest. Note that official school events and VIPS events are managed separately.</span>
 </div>
 </div>
 <div class="featured-wrap">
@@ -998,7 +998,6 @@ For multi-day items, remove only after data-end-date has passed.
 <div class="featured-reel" id="featuredReel">
 
 
-<article class="dated-item featured-slide blue" data-end-date="2026-09-22" data-start-date="2026-09-22"><img alt="Night at the Nest schedule" class="featured-image" src="night-at-the-nest.png"/><div class="featured-body"><span class="deadline">NIGHT AT THE NEST</span><h3>Night at the Nest 🪺</h3><p><strong>5:30–6:30 PM</strong><br/>Sept. 15: K, 2nd, 4th &amp; LS<br/>Sept. 22: Pre-K, 1st, 3rd &amp; 5th<br/><span style="font-size:12px">Front and back parking lots are available for evening events.</span></p><div class="featured-actions"><button class="calendar-btn" onclick="downloadCalendarEvent({title:'Night at the Nest — Pre-K, 1st, 3rd &amp; 5th',start:'20260922T173000',end:'20260922T183000',allDay:false,details:'Night at the Nest for Pre-K, 1st, 3rd, and 5th. Front and back parking lots are available for evening events.'})" type="button">＋ Sept. 22 to Calendar</button></div></div></article>
 <article class="featured-slide purple">
 <div class="featured-placeholder"><div><span class="big">📸</span><strong>Share Your McGown Moments!</strong></div></div>
 <div class="featured-body">
@@ -1010,7 +1009,6 @@ For multi-day items, remove only after data-end-date has passed.
 </article></div>
 <div class="featured-dots">
 <button aria-label="Featured item 1" class="featured-dot active" onclick="goFeatured(0)" type="button"></button>
-<button aria-label="Featured item 2" class="featured-dot" onclick="goFeatured(1)" type="button"></button>
 </div>
 </div>
 <h2 class="section-title">🙌 Volunteer</h2>
@@ -1172,48 +1170,6 @@ For multi-day items, remove only after data-end-date has passed.
 <div class="op-head"><div><h3>Pajama Party — Test Sign-Up 🧪</h3><div class="meta">Prototype only • Test the Google-powered volunteer sign-up flow<br/>This is not a real scheduled event.</div></div><div class="spots">TEST</div></div>
 <div class="op-tags"><span class="op-tag">Any grade</span><span class="op-tag">At school</span><span class="op-tag">Special Programs</span></div>
 <div class="op-actions"><button class="btn" onclick="window.open('https://script.google.com/macros/s/AKfycbxASlWHmFlRGVsRLhxcDdwWgHOjLe_Ygshp-3csk0QCBsW5srLplZdERIeDCitHJYhN6A/exec','_blank','noopener')">Open Test Sign-Up</button></div>
-</div>
-<div class="dated-item op-card" data-committee="instructional" data-date="this-week" data-end-date="2026-09-02" data-grade="all" data-id="library-shelving" data-start-date="2026-09-02" data-time="school-hours" data-title="Library shelving" data-type="school">
-<button aria-label="Save Library shelving" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
-<div class="op-head"><div><h3>Library Shelving 📚</h3><div class="meta">Wednesday • 9:30–10:30 AM<br/>Campus library</div></div><div class="spots">2 spots</div></div>
-<div class="op-tags"><span class="op-tag">Any grade</span><span class="op-tag">At school</span><span class="op-tag">Instructional</span></div>
-<div class="op-actions"><button class="btn" onclick="toast('Placeholder signup')">Sign Up</button></div>
-</div>
-<div class="dated-item op-card" data-committee="instructional" data-date="next-week" data-end-date="2026-09-02" data-grade="1st" data-id="first-grade-reading-buddies" data-start-date="2026-09-02" data-time="school-hours" data-title="First grade reading buddies" data-type="school">
-<button aria-label="Save First grade reading buddies" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
-<div class="op-head"><div><h3>1st Grade Reading Buddies 📖</h3><div class="meta">Tuesday • 1:00–2:00 PM<br/>1st grade classrooms</div></div><div class="spots">5 spots</div></div>
-<div class="op-tags"><span class="op-tag">1st grade</span><span class="op-tag">At school</span><span class="op-tag">Instructional</span></div>
-<div class="op-actions"><button class="btn" onclick="toast('Placeholder signup')">Sign Up</button></div>
-</div>
-<div class="dated-item op-card" data-committee="special" data-date="3plus-weeks" data-end-date="2026-09-02" data-grade="all" data-id="family-night-setup" data-start-date="2026-09-02" data-time="after-school" data-title="Family night setup" data-type="school">
-<button aria-label="Save Family night setup" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
-<div class="op-head"><div><h3>Family Night Setup 🎈</h3><div class="meta">Friday • 4:00–5:30 PM<br/>Cafeteria &amp; hallways</div></div><div class="spots">8 spots</div></div>
-<div class="op-tags"><span class="op-tag">Any grade</span><span class="op-tag">After school</span><span class="op-tag">Special Programs</span></div>
-<div class="op-actions"><button class="btn" onclick="toast('Placeholder signup')">Sign Up</button></div>
-</div>
-<div class="dated-item op-card" data-committee="fundraising" data-date="3plus-weeks" data-end-date="2026-09-02" data-grade="all" data-id="auction-basket-assembly" data-start-date="2026-09-02" data-time="anytime" data-title="Auction basket assembly" data-type="home">
-<button aria-label="Save Auction basket assembly" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
-<div class="op-head"><div><h3>Auction Basket Assembly 🎁</h3><div class="meta">Flexible timing • Complete at home<br/>Materials provided</div></div><div class="spots">Open</div></div>
-<div class="op-tags"><span class="op-tag">Any grade</span><span class="op-tag">At home</span><span class="op-tag">Fundraising</span></div>
-<div class="op-actions"><button class="btn" onclick="toast('Placeholder signup')">I'll Help</button></div>
-</div>
-<div class="dated-item op-card" data-committee="classroom" data-date="3plus-weeks" data-end-date="2026-09-18" data-grade="kinder" data-id="kindergarten-classroom-prep" data-start-date="2026-09-18" data-time="anytime" data-title="Kindergarten classroom prep" data-type="home">
-<button aria-label="Save Kindergarten classroom prep" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
-<div class="op-head"><div><h3>Kinder Classroom Prep ✂️</h3><div class="meta">Friday • About 45 minutes<br/>Cut and sort classroom materials</div></div><div class="spots">3 spots</div></div>
-<div class="op-tags"><span class="op-tag">Kinder</span><span class="op-tag">At home</span><span class="op-tag">Classroom</span></div>
-<div class="op-actions"><button class="btn" onclick="toast('Placeholder signup')">I'll Help</button></div>
-</div>
-<div class="dated-item op-card" data-committee="community" data-date="3plus-weeks" data-end-date="2026-09-24" data-grade="all" data-id="community-food-drive-pickup" data-start-date="2026-09-24" data-time="after-school" data-title="Community food drive pickup" data-type="offsite">
-<button aria-label="Save Community food drive pickup" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
-<div class="op-head"><div><h3>Food Drive Pickup 🚗</h3><div class="meta">Thursday • 4:30–6:00 PM<br/>Neighborhood collection route</div></div><div class="spots">4 drivers</div></div>
-<div class="op-tags"><span class="op-tag">Any grade</span><span class="op-tag">Off-site</span><span class="op-tag">Community Outreach</span></div>
-<div class="op-actions"><button class="btn" onclick="toast('Placeholder signup')">Sign Up</button></div>
-</div>
-<div class="dated-item op-card" data-committee="classroom" data-date="ongoing" data-end-date="2026-10-01" data-grade="3rd" data-id="third-grade-science-materials" data-start-date="2026-10-01" data-time="anytime" data-title="Third grade science materials" data-type="home">
-<button aria-label="Save Third grade science materials" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
-<div class="op-head"><div><h3>3rd Grade Science Prep 🔬</h3><div class="meta">Ongoing • Flexible<br/>Sort and label experiment materials</div></div><div class="spots">Open</div></div>
-<div class="op-tags"><span class="op-tag">3rd grade</span><span class="op-tag">At home</span><span class="op-tag">Classroom</span></div>
-<div class="op-actions"><button class="btn" onclick="toast('Placeholder signup')">I'll Help</button></div>
 </div>
 <div class="dated-item op-card" data-committee="classroom" data-date="3plus-weeks" data-end-date="2026-10-07" data-grade="kinder 1st 2nd" data-id="primary-grades-hallway-displays" data-start-date="2026-10-07" data-time="school-hours" data-title="Primary grades hallway displays" data-type="school">
 <button aria-label="Save Primary grades hallway displays" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
@@ -1411,20 +1367,6 @@ For multi-day items, remove only after data-end-date has passed.
 <div class="date-empty" id="noUpcomingDateResults">No dates match this category.</div>
 <p class="small" style="font-size:11px;line-height:1.4;margin-top:12px;text-align:center">Dates are subject to change. Please check back for updates.</p>
 
-<details style="margin-top:18px">
-<summary style="cursor:pointer;font-weight:800;color:var(--accent-dark);padding:10px 0">Past VIPS Events</summary>
-<div class="date-list" style="margin-top:8px">
-<article class="date-item archived-opportunity" data-category="vips" data-date="2026-09-15" data-end-date="2026-09-15" data-start-date="2026-09-15">
-<div class="date-icon">🦉</div>
-<div class="date-main">
-<div class="date-topline"><span class="date-category">VIPS Event</span></div>
-<h3 class="date-title">VIPS General Info Meeting</h3>
-<div class="date-meta"><strong>Tuesday, September 15 • 9:30 AM</strong><br/>McGown Cafeteria<br/>Homeroom Parent Meeting begins at 9:00 AM.</div>
-</div>
-<div class="date-actions"><span class="archive-badge">Past Event</span></div>
-</article>
-</div>
-</details>
 </section>
 <section class="panel" id="newvolunteer">
 <button class="back" onclick="showPanel('home')">← Home</button>
@@ -2254,6 +2196,70 @@ function hidePastHubDates(referenceDate){
 /* SchoolCafe monthly menu — loaded from the VIPS Hub backend.
    Static September assets remain as a graceful fallback if the backend is unavailable. */
 const VIPS_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbykY-BIDOzbmJLhdGVfd4dNcjdi4RSz31G-gDS4pIO-82JI8NtLOSDW7SOYd6rOEGQbGg/exec';
+
+/* News From the Nest — backend-driven public test.
+   The existing hard-coded banner remains visible as a graceful fallback. */
+const NEWS_STATIC_FALLBACK = {
+  id: 'news-from-the-nest',
+  title: 'Latest News From the Nest',
+  description: 'For official updates and events from McGown, be sure to review the latest News From the Nest. Note that official school events and VIPS events are managed separately.',
+  buttonText: 'Read Latest News ↗',
+  link: 'https://app.smore.com/n/db369',
+  active: true
+};
+let currentNews = Object.assign({}, NEWS_STATIC_FALLBACK);
+
+function newsField(row, names){
+  for(const name of names){
+    if(row && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') return row[name];
+  }
+  return '';
+}
+
+function normalizeNewsRecord(row){
+  if(!row) return null;
+  return {
+    id: String(newsField(row,['ID','id']) || '').trim(),
+    title: String(newsField(row,['Title','title']) || '').trim(),
+    description: String(newsField(row,['Description','description']) || '').trim(),
+    buttonText: String(newsField(row,['Button Text','buttonText']) || '').trim(),
+    link: String(newsField(row,['Link','link']) || '').trim(),
+    active: newsField(row,['Active','active']) === true || String(newsField(row,['Active','active'])).toLowerCase() === 'true'
+  };
+}
+
+function applyNewsRecord(news){
+  if(!news || !news.active || !news.link) return false;
+  currentNews = Object.assign({}, NEWS_STATIC_FALLBACK, news);
+  const title = document.getElementById('newsBannerTitle');
+  const description = document.getElementById('newsBannerDescription');
+  const banner = document.getElementById('newsBanner');
+  if(title) title.textContent = (currentNews.title || NEWS_STATIC_FALLBACK.title) + ' ↗';
+  if(description) description.textContent = currentNews.description || NEWS_STATIC_FALLBACK.description;
+  if(banner) banner.setAttribute('aria-label', 'Open ' + (currentNews.title || NEWS_STATIC_FALLBACK.title));
+  return true;
+}
+
+function openCurrentNews(){
+  const link = currentNews && currentNews.link ? currentNews.link : NEWS_STATIC_FALLBACK.link;
+  window.open(link, '_blank');
+}
+
+async function loadNews(){
+  try{
+    const response = await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(), {cache:'no-store'});
+    if(!response.ok) throw new Error('Backend unavailable');
+    const payload = await response.json();
+    const rows = payload && Array.isArray(payload.news) ? payload.news : [];
+    const normalized = rows.map(normalizeNewsRecord).filter(Boolean);
+    const news = normalized.find(item => item.id === 'news-from-the-nest' && item.active) || normalized.find(item => item.active);
+    applyNewsRecord(news);
+  }catch(error){
+    currentNews = Object.assign({}, NEWS_STATIC_FALLBACK);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadNews);
 const SCHOOLCAFE_STATIC_FALLBACK = {
   month: 'September',
   year: '2026',
