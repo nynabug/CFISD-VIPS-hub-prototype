@@ -1081,7 +1081,7 @@ For multi-day items, remove only after data-end-date has passed.
 <h2 class="section-title">🙌 Volunteer Opportunities</h2>
 <div class="info-card" style="margin-bottom:14px;border-left-color:var(--gold);background:#fffaf0">
 <strong>🧪 This page is being tested!</strong>
-<span>Listings on this page are placeholders and do not indicate real events, dates, or information quite yet.</span>
+<span>This test page is now connected to the VIPS Admin Dashboard. Active volunteer opportunities published there should appear here automatically.</span>
 </div>
 <div class="favorite-note">
 <strong>⭐ Save the opportunities you care about</strong>
@@ -1163,7 +1163,7 @@ For multi-day items, remove only after data-end-date has passed.
 <button class="chip" data-value="classroom" onclick="setOpportunityFilter(this,'committee','classroom')">Classroom</button>
 </div>
 </div>
-<div class="filter-summary"><span id="opCount">10</span> sample opportunities shown</div>
+<div class="filter-summary"><span id="opCount">0</span> volunteer opportunities shown</div>
 <div id="cards">
 <div class="dated-item op-card" data-committee="special" data-date="3plus-weeks" data-end-date="2099-12-31" data-grade="all" data-id="pajama-party-prototype-signup" data-start-date="2099-12-31" data-time="after-school" data-title="Pajama Party prototype sign-up" data-type="school">
 <button aria-label="Save Pajama Party prototype sign-up" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
@@ -1185,7 +1185,7 @@ For multi-day items, remove only after data-end-date has passed.
 </div>
 </div>
 <div class="no-results" id="noOpportunityResults">
-<strong>No sample opportunities match those filters.</strong><br/>
+<strong>No volunteer opportunities match those filters.</strong><br/>
         Try changing one of the filters above.
       </div>
 </section>
@@ -1395,7 +1395,7 @@ For multi-day items, remove only after data-end-date has passed.
 <h2 class="section-title">🏠 Help From Home</h2>
 <div class="info-card" style="margin-bottom:14px;border-left-color:var(--gold);background:#fffaf0">
 <strong>🧪 This page is being tested!</strong>
-<span>Listings on this page are placeholders and do not indicate real events, dates, or information quite yet.</span>
+<span>This test page is now connected to the VIPS Admin Dashboard. Active volunteer opportunities published there should appear here automatically.</span>
 </div>
 <div class="list">
 <div class="info-card"><strong>Prep classroom flash cards</strong><span>30–45 min • Materials sent home with your child or picked up at front desk.</span></div>
@@ -1508,7 +1508,7 @@ For multi-day items, remove only after data-end-date has passed.
 <h2 class="section-title">❓ Help &amp; FAQ</h2>
 <div class="info-card" style="margin-bottom:14px;border-left-color:var(--gold);background:#fffaf0">
 <strong>🧪 This page is being tested!</strong>
-<span>Listings on this page are placeholders and do not indicate real events, dates, or information quite yet.</span>
+<span>This test page is now connected to the VIPS Admin Dashboard. Active volunteer opportunities published there should appear here automatically.</span>
 </div>
 <div class="list">
 <div class="info-card"><strong>Do I need volunteer approval?</strong><span>For many campus roles, yes. This hub would route you to the official CFISD process.</span></div>
@@ -1811,6 +1811,144 @@ function applyOpportunityFilters(){
   if(empty) empty.style.display = visible === 0 ? 'block' : 'none';
 }
 
+
+
+/* Volunteer Opportunities — backend-driven public test.
+   Static cards remain only as a graceful fallback if the backend genuinely fails. */
+const VOLUNTEER_STATIC_HTML = (() => {
+  const cards = document.getElementById('cards');
+  return cards ? cards.innerHTML : '';
+})();
+
+function volunteerField(row,names){
+  for(const name of names){
+    if(row && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') return row[name];
+  }
+  return '';
+}
+function volunteerBool(v){ return v === true || String(v).toLowerCase() === 'true'; }
+function volunteerDate(v){ return normalizeBackendDate(v); }
+function volunteerCommitteeKey(v){
+  const x=String(v||'').toLowerCase();
+  if(x.includes('community')) return 'community';
+  if(x.includes('fundrais')) return 'fundraising';
+  if(x.includes('special')) return 'special';
+  if(x.includes('instruction')) return 'instructional';
+  if(x.includes('classroom')) return 'classroom';
+  return 'all';
+}
+function volunteerTypeKey(location){
+  const x=String(location||'').toLowerCase();
+  if(x.includes('home') || x.includes('remote')) return 'home';
+  if(x.includes('off-site') || x.includes('offsite') || x.includes('online') || x.includes('virtual')) return 'offsite';
+  return 'school';
+}
+function volunteerTimeKey(time){
+  const x=String(time||'').toLowerCase();
+  if(!x || x.includes('ongoing') || x.includes('any')) return 'anytime';
+  if(x.includes('pm') || x.includes('evening') || x.includes('after')) return 'after-school';
+  return 'school-hours';
+}
+function volunteerGradeKeys(grades){
+  const x=String(grades||'').toLowerCase();
+  if(!x || x.includes('all') || x.includes('any')) return 'all';
+  const out=[];
+  if(x.includes('pre-k') || x.includes('prek') || x.includes('pre k')) out.push('prek');
+  if(x.includes('kinder')) out.push('kinder');
+  for(let n=1;n<=5;n++) if(x.includes(String(n))) out.push(n+'th'.replace('1th','1st').replace('2th','2nd').replace('3th','3rd'));
+  return out.length ? out.join(' ') : 'all';
+}
+function volunteerDateBucket(startDate,endDate){
+  if(!startDate) return 'ongoing';
+  const today=new Date(); today.setHours(0,0,0,0);
+  const start=parseLocalDate(startDate); const end=parseLocalDate(endDate||startDate);
+  if(!start) return 'ongoing';
+  const day=(d)=>{ const x=new Date(d); x.setHours(0,0,0,0); return x; };
+  const weekStart=day(today); weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+  const thisEnd=day(weekStart); thisEnd.setDate(thisEnd.getDate()+6);
+  const nextStart=day(weekStart); nextStart.setDate(nextStart.getDate()+7);
+  const nextEnd=day(weekStart); nextEnd.setDate(nextEnd.getDate()+13);
+  if(end>=weekStart && start<=thisEnd) return 'this-week';
+  if(end>=nextStart && start<=nextEnd) return 'next-week';
+  if(start>nextEnd) return '3plus-weeks';
+  return 'ongoing';
+}
+function volunteerFormatDates(start,end,time){
+  let text='';
+  const a=parseLocalDate(start), b=parseLocalDate(end||start);
+  if(a){
+    if(b && b.getTime()!==a.getTime()) text=`${a.toLocaleDateString('en-US',{month:'long',day:'numeric'})}–${b.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
+    else text=a.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  } else text='Ongoing / flexible';
+  if(time) text += ` • ${time}`;
+  return text;
+}
+function volunteerSignupButton(type,link){
+  if(!link || String(type||'').toLowerCase().includes('no signup')) return '';
+  const safe=String(link).replace(/'/g,"\\'");
+  let label='Sign Up ↗';
+  if(String(type||'').toLowerCase().includes('owlmazing')) label='Open VIPS Sign-Up ↗';
+  else if(String(type||'').toLowerCase().includes('signupgenius')) label='Open SignUpGenius ↗';
+  return `<div class="op-actions"><button class="btn" onclick="window.open('${safe}','_blank','noopener')">${label}</button></div>`;
+}
+function renderBackendVolunteers(rows){
+  const cards=document.getElementById('cards'); if(!cards) return;
+  const items=rows.map(row=>{
+    const active=volunteerBool(volunteerField(row,['Active','active']));
+    if(!active) return null;
+    const start=volunteerDate(volunteerField(row,['Start Date','startDate']));
+    const end=volunteerDate(volunteerField(row,['End Date','endDate'])) || start;
+    return {
+      id:String(volunteerField(row,['ID','id'])||'').trim(),
+      title:String(volunteerField(row,['Title','title'])||'').trim(),
+      description:String(volunteerField(row,['Description','description'])||'').trim(),
+      start,end,
+      time:String(volunteerField(row,['Time','time'])||'').trim(),
+      location:String(volunteerField(row,['Location','location'])||'').trim(),
+      committee:String(volunteerField(row,['Committee','committee'])||'').trim(),
+      grades:String(volunteerField(row,['Grades','grades'])||'').trim(),
+      signupType:String(volunteerField(row,['Signup Type','signupType'])||'').trim(),
+      signupLink:String(volunteerField(row,['Signup Link','signupLink'])||'').trim()
+    };
+  }).filter(x=>x && x.title);
+  items.sort((a,b)=>(a.start||'9999-12-31').localeCompare(b.start||'9999-12-31') || a.title.localeCompare(b.title));
+  cards.innerHTML=items.map(item=>{
+    const committeeKey=volunteerCommitteeKey(item.committee), typeKey=volunteerTypeKey(item.location), timeKey=volunteerTimeKey(item.time), gradeKeys=volunteerGradeKeys(item.grades), dateBucket=volunteerDateBucket(item.start,item.end);
+    const tags=[];
+    if(item.grades) tags.push(item.grades); else tags.push('Any grade');
+    if(item.location) tags.push(item.location);
+    if(item.committee) tags.push(item.committee);
+    const meta=[volunteerFormatDates(item.start,item.end,item.time),item.location,item.description].filter(Boolean).map(escapeHtml).join('<br/>');
+    const id=escapeHtml(item.id||item.title.toLowerCase().replace(/[^a-z0-9]+/g,'-'));
+    return `<div class="dated-item op-card" data-committee="${committeeKey}" data-date="${dateBucket}" data-end-date="${escapeHtml(item.end||'')}" data-grade="${escapeHtml(gradeKeys)}" data-id="${id}" data-start-date="${escapeHtml(item.start||'')}" data-time="${timeKey}" data-title="${escapeHtml(item.title)}" data-type="${typeKey}">
+      <button aria-label="Save ${escapeHtml(item.title)}" class="favorite-star" onclick="toggleOpportunityFavorite(event,this)" title="Save for later" type="button">☆</button>
+      <div class="op-head"><div><h3>${escapeHtml(item.title)}</h3><div class="meta">${meta}</div></div></div>
+      <div class="op-tags">${tags.map(t=>`<span class="op-tag">${escapeHtml(t)}</span>`).join('')}</div>
+      ${volunteerSignupButton(item.signupType,item.signupLink)}
+    </div>`;
+  }).join('');
+  updateFavoriteUI();
+  applyOpportunityFilters();
+}
+async function loadVolunteerOpportunities(){
+  try{
+    const response=await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(),{cache:'no-store'});
+    if(!response.ok) throw new Error('Backend unavailable');
+    const payload=await response.json();
+    const rows = Array.isArray(payload.volunteerOpportunities) ? payload.volunteerOpportunities :
+                 Array.isArray(payload.volunteers) ? payload.volunteers :
+                 Array.isArray(payload.opportunities) ? payload.opportunities :
+                 Array.isArray(payload.volunteer) ? payload.volunteer : null;
+    if(rows===null) throw new Error('Volunteer Opportunities missing from backend response');
+    renderBackendVolunteers(rows);
+  }catch(error){
+    const cards=document.getElementById('cards');
+    if(cards) cards.innerHTML=VOLUNTEER_STATIC_HTML;
+    updateFavoriteUI();
+    applyOpportunityFilters();
+  }
+}
+document.addEventListener('DOMContentLoaded', loadVolunteerOpportunities);
 
 const committeeMapData = {
   community:{
