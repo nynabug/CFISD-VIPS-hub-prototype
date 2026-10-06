@@ -951,6 +951,18 @@ header h1{position:relative;z-index:1;margin-top:15px}
 .backend-loading-spinner{width:20px;height:20px;border:3px solid rgba(0,0,0,.12);border-top-color:var(--accent);border-radius:50%;animation:backendSpin .8s linear infinite;flex:0 0 auto}
 @keyframes backendSpin{to{transform:rotate(360deg)}}
 
+
+/* Featured loading card — occupies the final feature footprint immediately. */
+.featured-loading-card{position:relative;height:165px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#f2effa 0%,#eef8fb 52%,#fff9e8 100%);box-shadow:var(--shadow);isolation:isolate}
+.featured-loading-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 20%,rgba(255,255,255,.82),transparent 28%),radial-gradient(circle at 82% 74%,rgba(255,255,255,.72),transparent 30%);pointer-events:none}
+.featured-loading-copy{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;padding:16px;text-align:center;color:var(--accent-dark);font-size:12px;font-weight:900;letter-spacing:.02em;text-shadow:0 1px 0 rgba(255,255,255,.9)}
+.featured-loading-owls{position:absolute;inset:0;z-index:2;overflow:hidden}
+.featured-loading-owl{position:absolute;bottom:-38px;font-size:24px;line-height:1;opacity:0;filter:drop-shadow(0 3px 3px rgba(43,61,73,.12));animation:featuredOwlFloat 2.6s ease-in-out infinite}
+.featured-loading-owl:nth-child(1){left:5%;font-size:22px;animation-delay:0s;animation-duration:2.7s}.featured-loading-owl:nth-child(2){left:15%;font-size:28px;animation-delay:.35s;animation-duration:3s}.featured-loading-owl:nth-child(3){left:27%;font-size:20px;animation-delay:.7s;animation-duration:2.5s}.featured-loading-owl:nth-child(4){left:39%;font-size:31px;animation-delay:1.05s;animation-duration:3.1s}.featured-loading-owl:nth-child(5){left:51%;font-size:23px;animation-delay:1.4s;animation-duration:2.8s}.featured-loading-owl:nth-child(6){left:62%;font-size:27px;animation-delay:.18s;animation-duration:3.2s}.featured-loading-owl:nth-child(7){left:72%;font-size:19px;animation-delay:.55s;animation-duration:2.6s}.featured-loading-owl:nth-child(8){left:82%;font-size:30px;animation-delay:.9s;animation-duration:3s}.featured-loading-owl:nth-child(9){left:91%;font-size:21px;animation-delay:1.25s;animation-duration:2.7s}
+@keyframes featuredOwlFloat{0%{transform:translate3d(0,0,0) rotate(-5deg) scale(.86);opacity:0}14%{opacity:.72}50%{transform:translate3d(8px,-82px,0) rotate(7deg) scale(1);opacity:.9}86%{opacity:.6}100%{transform:translate3d(-5px,-190px,0) rotate(-4deg) scale(.9);opacity:0}}
+#featuredWrap.backend-resolved .featured-loading-card,#featuredWrap.backend-zero-state .featured-loading-card{display:none}
+html.backend-pending #featuredWrap:not(.backend-resolved):not(.backend-zero-state) #featuredReel{display:none !important}
+@media(prefers-reduced-motion:reduce){.featured-loading-owl{animation:none;opacity:.45;bottom:auto}.featured-loading-owl:nth-child(1),.featured-loading-owl:nth-child(4),.featured-loading-owl:nth-child(7){top:22px}.featured-loading-owl:nth-child(2),.featured-loading-owl:nth-child(5),.featured-loading-owl:nth-child(8){top:70px}.featured-loading-owl:nth-child(3),.featured-loading-owl:nth-child(6),.featured-loading-owl:nth-child(9){top:118px}}
 .committee-featured-section{margin:14px 0 16px}
 .committee-featured-label{display:block;margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--purple)}
 .committee-featured-stack{display:grid;gap:12px}
@@ -970,19 +982,10 @@ header h1{position:relative;z-index:1;margin-top:15px}
   html.backend-pending #upcomingDateList.backend-resolved,
   html.backend-pending #schoolCafeMenuCard.backend-resolved { display:revert !important; }
 
-  /* Reserve the Featured area during its backend fetch so content below it never jumps. */
+  /* Featured loader owns the reserved feature footprint until live data resolves. */
   html.backend-pending #featuredWrap:not(.backend-zero-state){display:block !important;}
-  html.backend-pending #featuredWrap:not(.backend-resolved):not(.backend-zero-state) #featuredReel{
-    visibility:hidden;
-    min-height:165px;
-    border:1px solid var(--line);
-    border-radius:18px;
-    background:rgba(255,255,255,.42);
-    box-shadow:var(--shadow);
-  }
   html.backend-pending #featuredWrap:not(.backend-resolved) .featured-controls,
   html.backend-pending #featuredWrap:not(.backend-resolved) .featured-dots{visibility:hidden;}
-  html.backend-pending #featuredWrap.backend-resolved #featuredReel,
   html.backend-pending #featuredWrap.backend-resolved .featured-controls,
   html.backend-pending #featuredWrap.backend-resolved .featured-dots{visibility:visible;}
   #featuredWrap.backend-zero-state { display:none !important; }
@@ -1047,6 +1050,10 @@ For multi-day items, remove only after data-end-date has passed.
 <button aria-label="Previous featured item" class="featured-arrow" onclick="moveFeatured(-1)" type="button">‹</button>
 <button aria-label="Next featured item" class="featured-arrow" onclick="moveFeatured(1)" type="button">›</button>
 </div>
+</div>
+<div class="featured-loading-card" id="featuredLoadingCard" role="status" aria-live="polite" aria-label="Loading featured stories">
+<div class="featured-loading-owls" aria-hidden="true"><span class="featured-loading-owl">🦉</span><span class="featured-loading-owl">🦉</span><span class="featured-loading-owl">🦉</span><span class="featured-loading-owl">🦉</span><span class="featured-loading-owl">🦉</span><span class="featured-loading-owl">🦉</span><span class="featured-loading-owl">🦉</span><span class="featured-loading-owl">🦉</span><span class="featured-loading-owl">🦉</span></div>
+<div class="featured-loading-copy">Gathering featured stories…</div>
 </div>
 <div class="featured-reel" id="featuredReel">
 
@@ -1523,6 +1530,7 @@ For multi-day items, remove only after data-end-date has passed.
 <button class="btn" onclick="window.open('https://www.dropbox.com/request/rvwhgwzy9glz6zoq3ln7','_blank')" type="button">Upload Yearbook Photos ↗</button>
 </div>
 </div>
+<div class="coming-soon-card"><span class="big">🛠️</span><strong>More information coming soon</strong><span>This page is still being built out with additional committee details, volunteer opportunities, signup links, contacts, and updates.</span></div>
 </section>
 <section class="panel" id="subcommitteeDetail">
 <button class="back" onclick="showPanel('committeemap'); clearCommitteeQuery()">← Committee Map</button>
