@@ -973,10 +973,8 @@ header h1{position:relative;z-index:1;margin-top:15px}
 <style id="owl-page-loader-styles">
   .owl-page-loader{
     display:flex;align-items:center;justify-content:center;gap:12px;
-    min-height:240px;padding:42px 16px;text-align:center;color:var(--muted,#667085);
+    min-height:120px;padding:18px 16px;text-align:center;color:var(--muted,#667085);
   }
-  .panel.owl-panel-loading > :not(.owl-page-loader){display:none !important;}
-  .panel.owl-panel-loading .owl-page-loader{display:flex !important;}
   .owl-loader-inner{display:flex;flex-direction:column;align-items:center;gap:9px}
   .owl-fill-wrap{
     position:relative;width:68px;height:68px;line-height:68px;
@@ -1641,7 +1639,7 @@ For multi-day items, remove only after data-end-date has passed.
 <script>
 let activeFilter='all';
 
-const owlPageLoadState = new Map();
+const owlLoadState = new Map();
 
 function owlLoaderMarkup(label){
   return `<div class="owl-page-loader" role="status" aria-live="polite">
@@ -1651,7 +1649,6 @@ function owlLoaderMarkup(label){
         <span class="owl-fill-color" aria-hidden="true">🦉</span>
       </div>
       <div class="owl-loader-label">${label || 'Loading…'}</div>
-      <div class="owl-loader-percent">0%</div>
     </div>
   </div>`;
 }
@@ -1659,65 +1656,39 @@ function setOwlLoadProgress(container, percent, label){
   if(!container) return;
   const p=Math.max(0,Math.min(100,Number(percent)||0));
   const wrap=container.querySelector('.owl-fill-wrap');
-  const pct=container.querySelector('.owl-loader-percent');
   const txt=container.querySelector('.owl-loader-label');
   if(wrap) wrap.style.setProperty('--owl-empty',(100-p)+'%');
-  if(pct) pct.textContent=Math.round(p)+'%';
   if(txt && label) txt.textContent=label;
 }
-function beginPanelOwlLoad(panelId,label){
-  const panel=document.getElementById(panelId);
-  if(!panel) return null;
-  const prior=owlPageLoadState.get(panelId);
-  if(prior && prior.timer) clearInterval(prior.timer);
-  let loader=panel.querySelector(':scope > .owl-page-loader');
-  if(!loader){
-    const holder=document.createElement('div');
-    holder.innerHTML=owlLoaderMarkup(label);
-    loader=holder.firstElementChild;
-    panel.prepend(loader);
-  }
-  panel.classList.add('owl-panel-loading');
-  loader.style.display='flex';
-  let progress=6;
-  setOwlLoadProgress(loader,progress,label || 'Loading…');
+function beginInlineOwlLoad(key,target,label){
+  if(!target) return null;
+  const loaderHolder=document.createElement('div');
+  loaderHolder.innerHTML=owlLoaderMarkup(label);
+  const loader=loaderHolder.firstElementChild;
+  target.innerHTML='';
+  target.appendChild(loader);
+  let progress=10;
+  setOwlLoadProgress(loader,progress,label);
   const timer=setInterval(()=>{
-    progress += Math.max(1,(88-progress)*0.12);
-    progress=Math.min(88,progress);
+    progress=Math.min(88,progress+Math.max(1,(88-progress)*.14));
     setOwlLoadProgress(loader,progress);
-  },110);
-  owlPageLoadState.set(panelId,{loader,timer});
+  },90);
+  owlLoadState.set(key,{loader,timer});
   return loader;
 }
-function updatePanelOwlLoad(panelId,percent,label){
-  const state=owlPageLoadState.get(panelId);
-  if(state) setOwlLoadProgress(state.loader,percent,label);
-}
-function finishPanelOwlLoad(panelId,label){
-  const panel=document.getElementById(panelId);
-  const state=owlPageLoadState.get(panelId);
-  if(!panel || !state) return;
+function finishInlineOwlLoad(key){
+  const state=owlLoadState.get(key);
+  if(!state) return;
   if(state.timer) clearInterval(state.timer);
-  setOwlLoadProgress(state.loader,100,label || 'Ready!');
-  setTimeout(()=>{
-    panel.classList.remove('owl-panel-loading');
-    state.loader.style.display='none';
-    owlPageLoadState.delete(panelId);
-  },180);
+  setOwlLoadProgress(state.loader,100,'Ready!');
+  owlLoadState.delete(key);
 }
-function panelNeedsBackendLoad(panelId){
-  return ['home','opportunities','calendar','schoolcafe'].includes(panelId);
-}
-function showLocalPanelOwl(panelId){
-  if(panelNeedsBackendLoad(panelId)) return;
-  beginPanelOwlLoad(panelId,'Loading page…');
-  setTimeout(()=>finishPanelOwlLoad(panelId),260);
-}
+/* Local/static panels render immediately. No loader is added just for navigation. */
+function showLocalPanelOwl(){}
 
 function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  showLocalPanelOwl(id);
   // Always apply Volunteer Now filters when the page opens so archived past events
   // are hidden immediately unless Show Past Events is explicitly enabled.
   if(id === 'opportunities') applyOpportunityFilters();
@@ -2463,8 +2434,8 @@ function escapeVolunteerHtml(value){
   return String(value).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 }
 async function loadVolunteerOpportunities(){
-  beginPanelOwlLoad('opportunities','Loading volunteer opportunities…');
   const cards=document.getElementById('cards');
+  beginInlineOwlLoad('volunteer',cards,'Loading volunteer opportunities…');
   if(cards) cards.innerHTML='';
   const summary=document.querySelector('#opportunities .filter-summary');
   if(summary) summary.innerHTML='<span id="opCount">…</span> Loading volunteer opportunities…';
@@ -2480,8 +2451,8 @@ async function loadVolunteerOpportunities(){
     const cards=document.getElementById('cards'); if(cards && !cards.children.length) cards.innerHTML=VOLUNTEER_STATIC_HTML;
     updateFavoriteUI(); applyOpportunityFilters();
   }finally{
+    finishInlineOwlLoad('volunteer');
     revealBackendSection('volunteer');
-    finishPanelOwlLoad('opportunities');
   }
 }
 document.addEventListener('DOMContentLoaded', loadVolunteerOpportunities);
@@ -2535,6 +2506,13 @@ function openCurrentNews(){
 }
 
 async function loadNews(){
+  const banner=document.getElementById('newsBanner');
+  let placeholder=document.getElementById('newsOwlPlaceholder');
+  if(banner && !placeholder){
+    placeholder=document.createElement('div'); placeholder.id='newsOwlPlaceholder';
+    banner.parentNode.insertBefore(placeholder,banner); banner.style.display='none';
+  }
+  beginInlineOwlLoad('news',placeholder,'Loading latest news…');
   try{
     const response = await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(), {cache:'no-store'});
     if(!response.ok) throw new Error('Backend unavailable');
@@ -2547,22 +2525,14 @@ async function loadNews(){
     currentNews = Object.assign({}, NEWS_STATIC_FALLBACK);
     applyNewsRecord(currentNews);
   }finally{
-    homeNewsReady=true;
-    updatePanelOwlLoad('home',55,'Loading featured updates…');
+    finishInlineOwlLoad('news');
+    if(placeholder) placeholder.remove();
+    if(banner) banner.style.display='';
     revealBackendSection('news');
-    maybeFinishHomeOwl();
   }
 }
 
-let homeNewsReady=false;
-let homeFeaturedReady=false;
-function maybeFinishHomeOwl(){
-  if(homeNewsReady && homeFeaturedReady) finishPanelOwlLoad('home');
-}
-document.addEventListener('DOMContentLoaded', function(){
-  beginPanelOwlLoad('home','Loading the latest from McGown…');
-  loadNews();
-});
+document.addEventListener('DOMContentLoaded', loadNews);
 
 
 /* Featured Items — backend-driven public test.
@@ -2647,6 +2617,13 @@ function renderBackendFeatured(items){
 }
 
 async function loadFeatured(){
+  const wrap=document.getElementById('featuredWrap');
+  let placeholder=document.getElementById('featuredOwlPlaceholder');
+  if(wrap && !placeholder){
+    placeholder=document.createElement('div'); placeholder.id='featuredOwlPlaceholder';
+    wrap.parentNode.insertBefore(placeholder,wrap);
+  }
+  beginInlineOwlLoad('featured',placeholder,'Loading featured updates…');
   try{
     const response=await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(),{cache:'no-store'});
     if(!response.ok) throw new Error('Backend unavailable');
@@ -2670,10 +2647,9 @@ async function loadFeatured(){
     if(reel) reel.innerHTML=FEATURED_STATIC_HTML.reel;
     if(dots) dots.innerHTML=FEATURED_STATIC_HTML.dots;
   }finally{
-    homeFeaturedReady=true;
-    updatePanelOwlLoad('home',90,'Finishing up…');
+    finishInlineOwlLoad('featured');
+    if(placeholder) placeholder.remove();
     revealBackendSection('featured');
-    maybeFinishHomeOwl();
   }
 }
 
@@ -2841,7 +2817,9 @@ function renderBackendUpcomingDates(events){
 }
 
 async function loadUpcomingDates(){
-  beginPanelOwlLoad('calendar','Loading upcoming dates…');
+  const list=document.getElementById('upcomingDateList');
+  beginInlineOwlLoad('upcoming',list,'Loading upcoming dates…');
+  if(list) list.style.display='';
   try{
     const response=await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(),{cache:'no-store'});
     if(!response.ok) throw new Error('Backend unavailable');
@@ -2865,8 +2843,8 @@ async function loadUpcomingDates(){
       list.style.display='';
     }
   }finally{
+    finishInlineOwlLoad('upcoming');
     revealBackendSection('upcoming');
-    finishPanelOwlLoad('calendar');
   }
 }
 
@@ -2927,7 +2905,15 @@ function applySchoolCafeMenu(menu){
 }
 
 async function loadSchoolCafeMenu(){
-  beginPanelOwlLoad('schoolcafe','Loading this month’s menu…');
+  const card=document.getElementById('schoolCafeMenuCard');
+  let placeholder=document.getElementById('schoolCafeOwlPlaceholder');
+  if(card && !placeholder){
+    placeholder=document.createElement('div');
+    placeholder.id='schoolCafeOwlPlaceholder';
+    card.parentNode.insertBefore(placeholder,card);
+  }
+  if(card) card.style.display='none';
+  beginInlineOwlLoad('schoolCafe',placeholder,'Loading this month’s menu…');
   try{
     const response = await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(), {cache:'no-store'});
     if(!response.ok) throw new Error('Backend unavailable');
@@ -2941,8 +2927,10 @@ async function loadSchoolCafeMenu(){
     // Keep the known-good static menu already rendered in the page.
     currentSchoolCafeMenu = Object.assign({}, SCHOOLCAFE_STATIC_FALLBACK);
   }finally{
+    finishInlineOwlLoad('schoolCafe');
+    if(placeholder) placeholder.remove();
+    if(card) card.style.display='';
     revealBackendSection('schoolCafe');
-    finishPanelOwlLoad('schoolcafe');
   }
 }
 
