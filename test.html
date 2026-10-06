@@ -956,13 +956,11 @@ header h1{position:relative;z-index:1;margin-top:15px}
 <meta content="VIPS Hub" name="application-name"/>
 
 <style id="backend-first-paint-gate">
-  html.backend-pending #newsBanner,
   html.backend-pending #featuredWrap,
   html.backend-pending #cards,
   html.backend-pending #upcomingDateList,
   html.backend-pending #schoolCafeMenuCard { display:none !important; }
 
-  html.backend-pending #newsBanner.backend-resolved,
   html.backend-pending #featuredWrap.backend-resolved,
   html.backend-pending #cards.backend-resolved,
   html.backend-pending #upcomingDateList.backend-resolved,
@@ -1912,6 +1910,24 @@ function committeeField(row,names){
   return '';
 }
 
+const COMMITTEE_ROLE_ORDER = {
+  community:['yearbook','wings-of-mcgown','watch-dogs','bang-school-adoption','mcgown-muscles','lost-and-found'],
+  fundraising:['fundraisers','spirit-nights','staff-appreciation'],
+  special:['fall-programs','beauty-of-mcgown','decor','lunch-visitors','music'],
+  instructional:['library','src','specials','garden'],
+  classroom:['prek-hrp','k-hrp','1st-hrp','2nd-hrp','3rd-hrp','4th-hrp','5th-hrp']
+};
+
+function sortCommitteeRoles(key,roles){
+  const order=COMMITTEE_ROLE_ORDER[key]||[];
+  return roles.slice().sort((a,b)=>{
+    const ai=order.indexOf(a.id), bi=order.indexOf(b.id);
+    const ar=ai===-1 ? Number.MAX_SAFE_INTEGER : ai;
+    const br=bi===-1 ? Number.MAX_SAFE_INTEGER : bi;
+    return ar-br || String(a.name||'').localeCompare(String(b.name||''));
+  });
+}
+
 function applyBackendCommittees(rows){
   if(!Array.isArray(rows)) return;
 
@@ -1958,7 +1974,7 @@ function applyBackendCommittees(rows){
 
   Object.keys(nextRoles).forEach(key=>{
     if(nextRoles[key].length){
-      committeeMapData[key].roles=nextRoles[key];
+      committeeMapData[key].roles=sortCommitteeRoles(key,nextRoles[key]);
     }
   });
 
@@ -2504,6 +2520,8 @@ function openCurrentNews(){
 }
 
 async function loadNews(){
+  // Render the embedded last-known News immediately, then refresh silently.
+  applyNewsRecord(currentNews);
   try{
     const response = await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(), {cache:'no-store'});
     if(!response.ok) throw new Error('Backend unavailable');
@@ -2551,6 +2569,7 @@ function normalizeFeaturedRecord(row){
     buttonText:String(featuredField(row,['Button Text','buttonText'])||'').trim(),
     buttonLink:String(featuredField(row,['Button Link','buttonLink'])||'').trim(),
     image:String(featuredField(row,['Image','image'])||'').trim(),
+    displayOrder:(()=>{ const raw=featuredField(row,['Display Order','displayOrder']); const n=Number(raw); return Number.isFinite(n) && n>0 ? n : Number.MAX_SAFE_INTEGER; })(),
     active:activeRaw===true || String(activeRaw).toLowerCase()==='true'
   };
 }
@@ -2610,7 +2629,9 @@ async function loadFeatured(){
     if(!response.ok) throw new Error('Backend unavailable');
     const payload=await response.json();
     const rows=payload && Array.isArray(payload.featured) ? payload.featured : [];
-    const items=rows.map(normalizeFeaturedRecord).filter(featuredIsCurrent);
+    const items=rows.map(normalizeFeaturedRecord).filter(featuredIsCurrent).sort((a,b)=>
+      a.displayOrder-b.displayOrder || a.title.localeCompare(b.title)
+    );
     const wrap=document.getElementById('featuredWrap');
     if(items.length){
       renderBackendFeatured(items);
