@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>McGown VIPS Admin</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="McGown VIPS Admin">
+  <meta name="theme-color" content="#167c80">
+
+  <link rel="apple-touch-icon" href="https://nynabug.github.io/CFISD-VIPS-hub-prototype/mcgown-admin-dashboard-icon.png">
+  <link rel="icon" type="image/png" href="https://nynabug.github.io/CFISD-VIPS-hub-prototype/mcgown-admin-dashboard-icon.png">
+
+  <style>
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #16858a, #5c3f86);
+      color: white;
+    }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .card {
+      max-width: 420px;
+      padding: 30px 26px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.14);
+      box-shadow: 0 18px 55px rgba(0,0,0,.16);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .owl { font-size: 54px; margin-bottom: 10px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    p { margin: 0 0 22px; line-height: 1.45; opacity: .92; }
+    a {
+      display: inline-block;
+      padding: 14px 20px;
+      border-radius: 14px;
+      background: white;
+      color: #176f73;
+      text-decoration: none;
+      font-weight: 800;
+    }
+  </style>
+
+  <script>
+    // Keep the launcher on its own origin for the Home Screen icon,
+    // then send the user to the authenticated Apps Script Admin Dashboard.
+    window.addEventListener('load', function () {
+      window.location.replace('https://script.google.com/macros/s/AKfycby8VFBAOfZDR26PcAOebALA87POhxKY0M56iUyL543hBz3HMWsmRgXW6eqW0FkUST8rmw/exec?admin=1');
+    });
+  </script>
+</head>
+<body>
+  <main class="card">
+    <div class="owl">🦉</div>
+    <h1>McGown VIPS Admin</h1>
+    <p>Opening the Admin Dashboard…</p>
+    <a href="https://script.google.com/macros/s/AKfycby8VFBAOfZDR26PcAOebALA87POhxKY0M56iUyL543hBz3HMWsmRgXW6eqW0FkUST8rmw/exec?admin=1">Open Admin Dashboard</a>
+  </main>
+</body>
+</html>
