@@ -511,6 +511,7 @@ header h1{position:relative;z-index:1;margin-top:15px}
 .featured-body{padding:16px}
 .featured-body h3{margin:0 0 7px;font-size:20px}
 .featured-body p{margin:0 0 12px;color:#5f6470;font-size:14px;line-height:1.45}
+.featured-meta{margin:-1px 0 8px;color:var(--accent-dark);font-size:12px;font-weight:800;line-height:1.35}
 .deadline,.test-badge{display:inline-block;margin-bottom:8px;padding:5px 8px;border-radius:999px;font-size:12px;font-weight:800}
 .deadline{background:#fff0e8;color:#9a471f;border:1px solid #f1c8b3}
 .test-badge{background:#fff3df;color:#9b5d16;border:1px solid #efd1a7}
@@ -2579,7 +2580,9 @@ function normalizeFeaturedRecord(row){
     subcommitteeId:String(featuredField(row,['Subcommittee ID','subcommitteeId'])||'').trim(),
     description:String(featuredField(row,['Description','description'])||'').trim(),
     startDate:normalizeBackendDate(featuredField(row,['Start Date','startDate'])),
+    startTime:String(featuredField(row,['Start Time','startTime'])||'').trim(),
     endDate:normalizeBackendDate(featuredField(row,['End Date','endDate'])),
+    endTime:String(featuredField(row,['End Time','endTime'])||'').trim(),
     buttonText:String(featuredField(row,['Button Text','buttonText'])||'').trim(),
     buttonLink:String(featuredField(row,['Button Link','buttonLink'])||'').trim(),
     image:String(featuredField(row,['Image','image'])||'').trim(),
@@ -2589,11 +2592,42 @@ function normalizeFeaturedRecord(row){
 }
 
 function featuredIsCurrent(item){
-  if(!item || !item.active || !item.title) return false;
-  const today=new Date(); today.setHours(0,0,0,0);
-  if(item.startDate){ const start=parseLocalDate(item.startDate); if(start && start>today) return false; }
-  if(item.endDate){ const end=parseLocalDate(item.endDate); if(end && end<today) return false; }
-  return true;
+  // Featured Start/End Date describe the featured event/item; they are not a visibility window.
+  // Admins explicitly control Hub visibility with the Active toggle.
+  return !!(item && item.active && item.title);
+}
+
+function formatFeaturedTime(time){
+  if(!time) return '';
+  const raw=String(time).trim();
+  const m=raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if(!m) return raw;
+  let h=Number(m[1]);
+  const mins=m[2];
+  const suffix=h>=12?'PM':'AM';
+  h=h%12 || 12;
+  return `${h}:${mins} ${suffix}`;
+}
+
+function formatFeaturedDateRange(item){
+  const start=parseLocalDate(item.startDate);
+  const end=parseLocalDate(item.endDate || item.startDate);
+  if(!start) return '';
+  const same=end && start.getFullYear()===end.getFullYear() && start.getMonth()===end.getMonth() && start.getDate()===end.getDate();
+  let text='';
+  if(!end || same){
+    text=start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  }else if(start.getFullYear()===end.getFullYear() && start.getMonth()===end.getMonth()){
+    text=`${start.toLocaleDateString('en-US',{month:'long'})} ${start.getDate()}–${end.getDate()}, ${start.getFullYear()}`;
+  }else{
+    text=`${start.toLocaleDateString('en-US',{month:'long',day:'numeric'})}–${end.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
+  }
+  const startTime=formatFeaturedTime(item.startTime);
+  const endTime=formatFeaturedTime(item.endTime);
+  if(startTime && endTime) text += ` • ${startTime}–${endTime}`;
+  else if(startTime) text += ` • ${startTime}`;
+  else if(endTime) text += ` • Until ${endTime}`;
+  return text;
 }
 
 function featuredEmoji(item){
@@ -2624,6 +2658,10 @@ function renderBackendFeatured(items){
     }
     const body=document.createElement('div'); body.className='featured-body';
     const h=document.createElement('h3'); h.textContent=item.title; body.appendChild(h);
+    const dateText=formatFeaturedDateRange(item);
+    if(dateText){
+      const meta=document.createElement('div'); meta.className='featured-meta'; meta.textContent=dateText; body.appendChild(meta);
+    }
     if(item.description){ const p=document.createElement('p'); p.textContent=item.description; body.appendChild(p); }
     if(item.buttonText && item.buttonLink){
       const actions=document.createElement('div'); actions.className='featured-actions';
