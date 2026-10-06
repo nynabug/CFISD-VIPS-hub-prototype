@@ -973,8 +973,10 @@ header h1{position:relative;z-index:1;margin-top:15px}
 <style id="owl-page-loader-styles">
   .owl-page-loader{
     display:flex;align-items:center;justify-content:center;gap:12px;
-    min-height:150px;padding:28px 16px;text-align:center;color:var(--muted,#667085);
+    min-height:240px;padding:42px 16px;text-align:center;color:var(--muted,#667085);
   }
+  .panel.owl-panel-loading > :not(.owl-page-loader){display:none !important;}
+  .panel.owl-panel-loading .owl-page-loader{display:flex !important;}
   .owl-loader-inner{display:flex;flex-direction:column;align-items:center;gap:9px}
   .owl-fill-wrap{
     position:relative;width:68px;height:68px;line-height:68px;
@@ -1666,17 +1668,25 @@ function setOwlLoadProgress(container, percent, label){
 function beginPanelOwlLoad(panelId,label){
   const panel=document.getElementById(panelId);
   if(!panel) return null;
+  const prior=owlPageLoadState.get(panelId);
+  if(prior && prior.timer) clearInterval(prior.timer);
   let loader=panel.querySelector(':scope > .owl-page-loader');
   if(!loader){
-    loader=document.createElement('div');
-    loader.innerHTML=owlLoaderMarkup(label);
-    loader=loader.firstElementChild;
+    const holder=document.createElement('div');
+    holder.innerHTML=owlLoaderMarkup(label);
+    loader=holder.firstElementChild;
     panel.prepend(loader);
   }
+  panel.classList.add('owl-panel-loading');
   loader.style.display='flex';
-  setOwlLoadProgress(loader,8,label || 'Loading…');
-  owlPageLoadState.set(panelId,{loader});
-  requestAnimationFrame(()=>setOwlLoadProgress(loader,28));
+  let progress=6;
+  setOwlLoadProgress(loader,progress,label || 'Loading…');
+  const timer=setInterval(()=>{
+    progress += Math.max(1,(88-progress)*0.12);
+    progress=Math.min(88,progress);
+    setOwlLoadProgress(loader,progress);
+  },110);
+  owlPageLoadState.set(panelId,{loader,timer});
   return loader;
 }
 function updatePanelOwlLoad(panelId,percent,label){
@@ -1684,20 +1694,24 @@ function updatePanelOwlLoad(panelId,percent,label){
   if(state) setOwlLoadProgress(state.loader,percent,label);
 }
 function finishPanelOwlLoad(panelId,label){
+  const panel=document.getElementById(panelId);
   const state=owlPageLoadState.get(panelId);
-  if(!state) return;
+  if(!panel || !state) return;
+  if(state.timer) clearInterval(state.timer);
   setOwlLoadProgress(state.loader,100,label || 'Ready!');
-  setTimeout(()=>{ state.loader.style.display='none'; owlPageLoadState.delete(panelId); },220);
+  setTimeout(()=>{
+    panel.classList.remove('owl-panel-loading');
+    state.loader.style.display='none';
+    owlPageLoadState.delete(panelId);
+  },180);
 }
-
-/* Lightweight page-transition loader for panels whose content is already local.
-   Backend panels use the same owl but are finished by their real data requests below. */
+function panelNeedsBackendLoad(panelId){
+  return ['home','opportunities','calendar','schoolcafe'].includes(panelId);
+}
 function showLocalPanelOwl(panelId){
-  const backendPanels=['home','opportunities','calendar','schoolcafe'];
-  if(backendPanels.includes(panelId)) return;
-  beginPanelOwlLoad(panelId,'Opening…');
-  requestAnimationFrame(()=>updatePanelOwlLoad(panelId,72,'Almost ready…'));
-  setTimeout(()=>finishPanelOwlLoad(panelId),180);
+  if(panelNeedsBackendLoad(panelId)) return;
+  beginPanelOwlLoad(panelId,'Loading page…');
+  setTimeout(()=>finishPanelOwlLoad(panelId),260);
 }
 
 function showPanel(id){
@@ -2450,7 +2464,6 @@ function escapeVolunteerHtml(value){
 }
 async function loadVolunteerOpportunities(){
   beginPanelOwlLoad('opportunities','Loading volunteer opportunities…');
-  updatePanelOwlLoad('opportunities',35);
   const cards=document.getElementById('cards');
   if(cards) cards.innerHTML='';
   const summary=document.querySelector('#opportunities .filter-summary');
@@ -2467,7 +2480,6 @@ async function loadVolunteerOpportunities(){
     const cards=document.getElementById('cards'); if(cards && !cards.children.length) cards.innerHTML=VOLUNTEER_STATIC_HTML;
     updateFavoriteUI(); applyOpportunityFilters();
   }finally{
-    updatePanelOwlLoad('opportunities',88,'Finishing up…');
     revealBackendSection('volunteer');
     finishPanelOwlLoad('opportunities');
   }
@@ -2535,11 +2547,18 @@ async function loadNews(){
     currentNews = Object.assign({}, NEWS_STATIC_FALLBACK);
     applyNewsRecord(currentNews);
   }finally{
+    homeNewsReady=true;
     updatePanelOwlLoad('home',55,'Loading featured updates…');
     revealBackendSection('news');
+    maybeFinishHomeOwl();
   }
 }
 
+let homeNewsReady=false;
+let homeFeaturedReady=false;
+function maybeFinishHomeOwl(){
+  if(homeNewsReady && homeFeaturedReady) finishPanelOwlLoad('home');
+}
 document.addEventListener('DOMContentLoaded', function(){
   beginPanelOwlLoad('home','Loading the latest from McGown…');
   loadNews();
@@ -2651,9 +2670,10 @@ async function loadFeatured(){
     if(reel) reel.innerHTML=FEATURED_STATIC_HTML.reel;
     if(dots) dots.innerHTML=FEATURED_STATIC_HTML.dots;
   }finally{
+    homeFeaturedReady=true;
     updatePanelOwlLoad('home',90,'Finishing up…');
     revealBackendSection('featured');
-    finishPanelOwlLoad('home');
+    maybeFinishHomeOwl();
   }
 }
 
@@ -2822,7 +2842,6 @@ function renderBackendUpcomingDates(events){
 
 async function loadUpcomingDates(){
   beginPanelOwlLoad('calendar','Loading upcoming dates…');
-  updatePanelOwlLoad('calendar',35);
   try{
     const response=await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(),{cache:'no-store'});
     if(!response.ok) throw new Error('Backend unavailable');
@@ -2846,7 +2865,6 @@ async function loadUpcomingDates(){
       list.style.display='';
     }
   }finally{
-    updatePanelOwlLoad('calendar',88,'Finishing up…');
     revealBackendSection('upcoming');
     finishPanelOwlLoad('calendar');
   }
@@ -2910,7 +2928,6 @@ function applySchoolCafeMenu(menu){
 
 async function loadSchoolCafeMenu(){
   beginPanelOwlLoad('schoolcafe','Loading this month’s menu…');
-  updatePanelOwlLoad('schoolcafe',35);
   try{
     const response = await fetch(VIPS_BACKEND_URL + '?_=' + Date.now(), {cache:'no-store'});
     if(!response.ok) throw new Error('Backend unavailable');
@@ -2924,7 +2941,6 @@ async function loadSchoolCafeMenu(){
     // Keep the known-good static menu already rendered in the page.
     currentSchoolCafeMenu = Object.assign({}, SCHOOLCAFE_STATIC_FALLBACK);
   }finally{
-    updatePanelOwlLoad('schoolcafe',88,'Finishing up…');
     revealBackendSection('schoolCafe');
     finishPanelOwlLoad('schoolcafe');
   }
