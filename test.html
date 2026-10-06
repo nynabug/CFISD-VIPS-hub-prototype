@@ -431,6 +431,8 @@ header h1{position:relative;z-index:1;margin-top:15px}
   font-size:13px;
   line-height:1.45;
 }
+
+.subcommittee-hero{background:linear-gradient(135deg,#f3eff9,#eaf7f6);border:1px solid #ddd5ee;border-radius:18px;padding:18px;margin-bottom:14px}.subcommittee-hero .subcommittee-icon{font-size:34px;margin-bottom:8px}.subcommittee-hero h3{margin:0 0 7px;color:var(--purple);font-size:22px}.subcommittee-hero p{margin:0;color:var(--muted);line-height:1.55}.subcommittee-meta{display:grid;gap:10px;margin:14px 0}.subcommittee-meta .info-card{margin:0}.coming-soon-card{text-align:center;background:#fffaf0;border:1px solid #f0dfb4;border-radius:16px;padding:22px 16px;margin-top:14px}.coming-soon-card .big{font-size:30px;display:block;margin-bottom:7px}.coming-soon-card strong{display:block;color:#765a12;margin-bottom:5px}.coming-soon-card span{color:var(--muted);font-size:13px;line-height:1.45}
 @media (min-width:520px){
   .committee-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .role-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1492,8 +1494,9 @@ For multi-day items, remove only after data-end-date has passed.
 </section>
 
 <section class="panel" id="yearbook">
-<button class="back" onclick="showPanel('committeemap')">← Committee Map</button>
+<button class="back" onclick="showPanel('committeemap'); clearCommitteeQuery()">← Committee Map</button>
 <h2 class="section-title">📘 Yearbook Committee</h2>
+<div class="info-card" style="border-left-color:var(--purple)"><strong>VIPS Liaisons</strong><span>Katie Sangl, Lisa Platt</span></div>
 <div class="info-card" style="border-left-color:var(--accent)">
 <strong>📸 Share Photos for the McGown Yearbook</strong>
 <span>Volunteers and McGown families can submit photos for the Yearbook Committee to consider for this year’s yearbook.</span>
@@ -1501,6 +1504,12 @@ For multi-day items, remove only after data-end-date has passed.
 <button class="btn" onclick="window.open('https://www.dropbox.com/request/rvwhgwzy9glz6zoq3ln7','_blank')" type="button">Upload Yearbook Photos ↗</button>
 </div>
 </div>
+</section>
+<section class="panel" id="subcommitteeDetail">
+<button class="back" onclick="showPanel('committeemap'); clearCommitteeQuery()">← Committee Map</button>
+<div class="subcommittee-hero"><div class="subcommittee-icon" id="subcommitteeDetailIcon">🦉</div><h3 id="subcommitteeDetailTitle">Subcommittee</h3><p id="subcommitteeDetailDescription"></p></div>
+<div class="subcommittee-meta"><div class="info-card" style="border-left-color:var(--purple)"><strong>VIPS Liaisons</strong><span id="subcommitteeDetailLiaisons"></span></div><div class="info-card" style="border-left-color:var(--accent)"><strong>Parent Committee</strong><span id="subcommitteeDetailParent"></span></div></div>
+<div class="coming-soon-card"><span class="big">🛠️</span><strong>More information coming soon</strong><span>This page is ready for future committee details, volunteer opportunities, signup links, contacts, and updates.</span></div>
 </section>
 <section class="panel" id="schoolcafe">
 <button class="back" onclick="showPanel('home')">← Home</button>
@@ -1850,106 +1859,143 @@ function applyOpportunityFilters(){
 
 
 const committeeMapData = {
-  community:{
-    title:'Community Outreach',
-    summary:'Builds connections and strengthens partnerships within and beyond McGown.',
-    roles:[
-      {icon:'📘',name:'Yearbook',summary:'Coordinates the annual McGown yearbook, including photos, vendor coordination, advertising, page deadlines, student information review, and distribution.',panel:'yearbook'},
-      {icon:'🪽',name:'Wings of McGown',summary:'Helps coordinate general campus volunteer needs, including creating SignUpGenius requests for activities such as screenings and picture day.'},
-      {icon:'🐾',name:'Watch D.O.G.S.',summary:'Supports McGown’s father-figure volunteer program by helping recruit participants, coordinate schedules, and celebrate volunteers on campus.'},
-      {icon:'🤝',name:'Bang School Adoption',summary:'Supports McGown’s partnership with Bang Elementary through donation drives, family support initiatives, and staff appreciation efforts.'},
-      {icon:'💪',name:'McGown Muscles',summary:'Coordinates volunteers for physically demanding campus needs such as event setup and campus-beautification projects.'},
-      {icon:'🔎',name:'Lost & Found',summary:'Develops systems to organize lost items, help families view what has been found, and reunite belongings with their owners.'}
-    ]
-  },
-  fundraising:{
-    title:'Fundraising',
-    summary:'Raises funds and resources to enhance student and teacher experiences at McGown.',
-    roles:[
-      {icon:'💵',name:'Fundraisers',summary:'Supports major and smaller fundraising efforts by seeking sponsorships, promoting events, coordinating volunteers, and helping with event execution.'},
-      {icon:'🍽️',name:'Spirit Nights',summary:'Coordinates restaurant and business partnership nights, including scheduling, promotion, communication, and tracking proceeds.'},
-      {icon:'💐',name:'Staff Appreciation',summary:'Plans staff-appreciation activities and works with community sponsors to provide meals, treats, and recognition throughout the year.'},
-      {icon:'🛍️',name:'Spirit Store',summary:'Assists with planning, ordering, and distributing McGown Spirit Store merchandise.'}
-    ]
-  },
-  special:{
-    title:'Special Programs',
-    summary:'Creates and supports memorable events and programs that enrich the McGown community.',
-    roles:[
-      {icon:'🎖️',name:'Fall Programs: Career Week & Veterans Day',summary:'Helps plan Veterans Day and Career Week through volunteer recruitment, communications, event logistics, community participation, and campus coordination.'},
-      {icon:'🌎',name:'Beauty of McGown',summary:'Supports McGown’s multicultural festival by coordinating event logistics, supplies, volunteers, rehearsals, and grade-level communication.'},
-      {icon:'🎨',name:'Decor',summary:'Plans and installs decorations and displays for school-wide special events while coordinating with staff and following campus safety requirements.'},
-      {icon:'🍎',name:'Lunch Visitors',summary:'Creates and maintains monthly lunch-visitor signups and coordinates closely with administration on visitor schedules and campus availability.'},
-      {icon:'🎵',name:'Music',summary:'Supports the Kindergarten, 2nd-grade, and 4th-grade musical programs with performance preparation, event coordination, and grade-level backdrops.'}
-    ]
-  },
-  instructional:{
-    title:'Instructional Volunteers',
-    summary:'Supports learning and instruction through volunteer-led resources and enrichment.',
-    roles:[
-      {icon:'📚',name:'Library',summary:'Works with the librarian to coordinate volunteer training, monthly library shifts, special-program signups, and coverage of open volunteer needs.'},
-      {icon:'🔬',name:'SRC — Science Resource Center',summary:'Coordinates parent training, classroom animal demonstrations, and transportation of animals between the Science Resource Center and McGown.'},
-      {icon:'🎨',name:'Specials: Art, Spanish ABL, PE & Field Day',summary:'Supports Specials teachers with displays, programs, supplies, event volunteers, and classroom-specific communication.'},
-      {icon:'🌱',name:'Garden',summary:'<strong style="color:var(--accent-dark);font-size:12px">Liaisons: Nyna Saenz, Allison Woodfin</strong><br>Coordinates with the school on garden management and organizes volunteers to weed, maintain, and support the campus garden.'}
-    ]
-  },
-  classroom:{
-    title:'Classroom Volunteers',
-    summary:'Partners with teachers and homeroom parents to support students and grade-level activities.',
-    roles:[
-      {icon:'🧸',name:'Pre-K Homeroom Parent Rep',summary:'Serves as a grade-level parent point of contact, helps organize parent participation, supports classroom needs, and coordinates grade-level volunteer tasks.'},
-      {icon:'🖍️',name:'Kindergarten Homeroom Parent Rep',summary:'Connects kindergarten teachers and families, coordinates parent participation, and helps organize classroom and grade-level needs.'},
-      {icon:'1️⃣',name:'1st Grade Homeroom Parent Rep',summary:'Supports 1st-grade teachers and families by coordinating communication, classroom help, events, and grade-level volunteer participation.'},
-      {icon:'2️⃣',name:'2nd Grade Homeroom Parent Rep',summary:'Supports 2nd-grade teachers and families by coordinating communication, classroom help, events, and grade-level volunteer participation.'},
-      {icon:'3️⃣',name:'3rd Grade Homeroom Parent Rep',summary:'Supports 3rd-grade teachers and families by coordinating communication, classroom help, events, and grade-level volunteer participation.'},
-      {icon:'4️⃣',name:'4th Grade Homeroom Parent Rep',summary:'Supports 4th-grade teachers and families by coordinating communication, classroom help, events, and grade-level volunteer participation.'},
-      {icon:'5️⃣',name:'5th Grade HRP & Programs',summary:'Coordinates 5th-grade parent communication and participation while also helping support the grade’s additional programs and activities.'}
-    ]
-  }
+ community:{title:'Community Outreach',summary:'Builds connections and strengthens partnerships within and beyond McGown.',roles:[
+ {id:'yearbook',icon:'📘',name:'Yearbook',liaisons:'Katie Sangl, Lisa Platt',summary:'Supports the creation of the McGown yearbook and helps collect photos from school events.',panel:'yearbook'},
+ {id:'wings-of-mcgown',icon:'🪽',name:'Wings of McGown',liaisons:'Sherilyn Martinez',summary:'Supports the Wings of McGown program and related volunteer activities.'},
+ {id:'watch-dogs',icon:'🐾',name:'Watch DOGS',liaisons:'Leah Harris, LaTisha Odili',summary:'Supports the McGown Watch DOGS program and volunteer participation.'},
+ {id:'bang-school-adoption',icon:'🤝',name:'Bang School Adoption',liaisons:'Brittany Zahora',summary:"Coordinates McGown's Bang School Adoption activities and support."},
+ {id:'mcgown-muscles',icon:'💪',name:'McGown Muscles',liaisons:'Tony LaThanh, Akash Kapoor',summary:'Coordinates McGown Muscles activities and volunteer support.'},
+ {id:'lost-and-found',icon:'🔎',name:'Lost & Found',liaisons:'Mandy Carberry',summary:"Helps organize and manage McGown's lost and found."}]},
+ fundraising:{title:'Fundraising',summary:'Raises funds and resources to enhance student and teacher experiences at McGown.',roles:[
+ {id:'fundraisers',icon:'💵',name:'Fundraisers',liaisons:'Anna Klein',summary:'Supports and coordinates school fundraising activities.'},
+ {id:'spirit-nights',icon:'🍽️',name:'Spirit Nights',liaisons:'Alexis Jones, Jennifer Hassig',summary:'Coordinates McGown Spirit Nights and related fundraising activities.'},
+ {id:'staff-appreciation',icon:'💐',name:'Staff Appreciation',liaisons:'Aurora Pisana, Amanda Klam',summary:'Coordinates activities that recognize and support McGown faculty and staff.'}]},
+ special:{title:'Special Programs',summary:'Creates and supports memorable events and programs that enrich the McGown community.',roles:[
+ {id:'fall-programs',icon:'🎖️',name:'Fall Programs: Career Week & Veterans Day',liaisons:'Megan Schruter, Abby Leblanc, Kristen Wylie',summary:'Coordinates volunteer support for Career Week, Veterans Day, and related fall programs.'},
+ {id:'beauty-of-mcgown',icon:'🌎',name:'Beauty of McGown',liaisons:'Elizabeth Lozada',summary:'Supports the Beauty of McGown program and related activities.'},
+ {id:'decor',icon:'🎨',name:'Decor',liaisons:'Jennifer Craft, Zara Parak, Yiwen Huang',summary:'Coordinates decorations for McGown events, programs, and activities.'},
+ {id:'lunch-visitors',icon:'🍎',name:'Lunch Visitors',liaisons:'Melissa Tucker',summary:'Supports and coordinates the McGown Lunch Visitors program.'},
+ {id:'music',icon:'🎵',name:'Music',liaisons:'K: Melissa Miller • 2nd: Araceli Bracero • 4th: Bernitha Anderson',summary:'Supports McGown music programs and related volunteer activities.'}]},
+ instructional:{title:'Instructional Volunteers',summary:'Supports learning and instruction through volunteer-led resources and enrichment.',roles:[
+ {id:'library',icon:'📚',name:'Library',liaisons:'Natalie Martin, Ericka Kouassi',summary:'Supports McGown library activities and volunteer needs.'},
+ {id:'src',icon:'🔬',name:'SRC',liaisons:'Robin Hillis, Christie Vial',summary:'Supports SRC activities and related volunteer needs.'},
+ {id:'specials',icon:'🎨',name:'Specials: Art, Spanish, ABL, PE, Field Day',liaisons:'Jayme Reuter, Jordan Poku',summary:'Supports McGown specials programs including Art, Spanish, ABL, PE, and Field Day.'},
+ {id:'garden',icon:'🌱',name:'Garden',liaisons:'Allison Woodfin, Nyna Saenz',summary:'Coordinates with the school to support and maintain the McGown garden.'}]},
+ classroom:{title:'Classroom Volunteers',summary:'Partners with teachers and homeroom parents to support students and grade-level activities.',roles:[
+ {id:'prek-hrp',icon:'🧸',name:'PreK HRP Rep',liaisons:'Amanda Carnahan',summary:'Serves as the volunteer liaison for PreK homeroom parents.'},
+ {id:'k-hrp',icon:'🖍️',name:'K HRP Rep',liaisons:'Krista Ferreyra',summary:'Serves as the volunteer liaison for Kindergarten homeroom parents.'},
+ {id:'1st-hrp',icon:'1️⃣',name:'1st HRP Rep',liaisons:'Kristin Bass',summary:'Serves as the volunteer liaison for first-grade homeroom parents.'},
+ {id:'2nd-hrp',icon:'2️⃣',name:'2nd HRP Rep',liaisons:'Molly Oyetunji',summary:'Serves as the volunteer liaison for second-grade homeroom parents.'},
+ {id:'3rd-hrp',icon:'3️⃣',name:'3rd HRP Rep',liaisons:'Monika Craig',summary:'Serves as the volunteer liaison for third-grade homeroom parents.'},
+ {id:'4th-hrp',icon:'4️⃣',name:'4th HRP Rep',liaisons:'Cindy Sosa',summary:'Serves as the volunteer liaison for fourth-grade homeroom parents.'},
+ {id:'5th-hrp',icon:'5️⃣',name:'5th HRP Rep & 5th Programs',liaisons:'Michelle Barrett',summary:'Serves as the volunteer liaison for fifth-grade homeroom parents and fifth-grade programs.'}]}
 };
-
-function renderCommittee(id, button){
-  const c = committeeMapData[id];
-  const title = document.getElementById('committeeMapTitle');
-  const summary = document.getElementById('committeeMapSummary');
-  const grid = document.getElementById('committeeRoleGrid');
-
-  if(!c || !title || !summary || !grid) return;
-
-  title.textContent = c.title;
-  summary.textContent = c.summary;
-  grid.innerHTML = '';
-
-  c.roles.forEach(role => {
-    const card = document.createElement('div');
-    card.className = 'role-card';
-    card.innerHTML = `
-      <div class="role-icon" aria-hidden="true">${role.icon}</div>
-      <strong>${role.name}</strong>
-      <span>${role.summary}</span>
-      ${role.panel ? '<div style="margin-top:8px;color:var(--accent);font-size:12px;font-weight:800">Open subcommittee page →</div>' : ''}
-    `;
-    if(role.panel){
-      card.style.cursor = 'pointer';
-      card.setAttribute('role','button');
-      card.setAttribute('tabindex','0');
-      card.onclick = () => showPanel(role.panel);
-      card.onkeydown = (e) => { if(e.key === 'Enter' || e.key === ' ') showPanel(role.panel); };
-    }
-    grid.appendChild(card);
-  });
-
-  document.querySelectorAll('#committeemap .committee-card')
-    .forEach(btn => btn.classList.remove('active'));
-
-  if(button) button.classList.add('active');
+function findSubcommitteeById(id){for(const key of Object.keys(committeeMapData)){const parent=committeeMapData[key];const role=parent.roles.find(r=>r.id===id);if(role)return{parentKey:key,parent,role};}return null;}
+function setCommitteeQuery(id){try{const url=new URL(window.location.href);if(id)url.searchParams.set('committee',id);else url.searchParams.delete('committee');history.replaceState({},'',url.pathname+url.search+url.hash);}catch(e){}}
+function clearCommitteeQuery(){setCommitteeQuery('');}
+function openSubcommittee(id){const found=findSubcommitteeById(id);if(!found)return;setCommitteeQuery(id);if(found.role.panel==='yearbook'){showPanel('yearbook');return;}document.getElementById('subcommitteeDetailIcon').textContent=found.role.icon||'🦉';document.getElementById('subcommitteeDetailTitle').textContent=found.role.name;document.getElementById('subcommitteeDetailDescription').textContent=found.role.summary||'';document.getElementById('subcommitteeDetailLiaisons').textContent=found.role.liaisons||'To be announced';document.getElementById('subcommitteeDetailParent').textContent=found.parent.title;showPanel('subcommitteeDetail');}
+function renderCommittee(id,button){const c=committeeMapData[id],title=document.getElementById('committeeMapTitle'),summary=document.getElementById('committeeMapSummary'),grid=document.getElementById('committeeRoleGrid');if(!c||!title||!summary||!grid)return;title.textContent=c.title;summary.textContent=c.summary;grid.innerHTML='';c.roles.forEach(role=>{const card=document.createElement('div');card.className='role-card';card.style.cursor='pointer';card.setAttribute('role','button');card.setAttribute('tabindex','0');card.innerHTML=`<div class="role-icon" aria-hidden="true">${role.icon}</div><strong>${role.name}</strong><span><strong style="color:var(--accent-dark);font-size:12px">Liaisons: ${role.liaisons}</strong><br>${role.summary}</span><div style="margin-top:8px;color:var(--accent);font-size:12px;font-weight:800">Open subcommittee page →</div>`;card.onclick=()=>openSubcommittee(role.id);card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSubcommittee(role.id);}};grid.appendChild(card);});document.querySelectorAll('#committeemap .committee-card').forEach(btn=>btn.classList.remove('active'));if(button)button.classList.add('active');}
+function committeeParentKey(name){
+  const normalized=String(name||'').trim().toLowerCase();
+  if(normalized==='community outreach') return 'community';
+  if(normalized==='fundraising') return 'fundraising';
+  if(normalized==='special programs') return 'special';
+  if(normalized==='instructional' || normalized==='instructional volunteers') return 'instructional';
+  if(normalized==='classroom volunteers') return 'classroom';
+  return '';
 }
 
-document.addEventListener('DOMContentLoaded', function(){
-  const initialButton = document.querySelector('#committeemap .committee-card[data-committee="community"]');
-  renderCommittee('community', initialButton);
-});
+function committeeField(row,names){
+  for(const name of names){
+    if(Object.prototype.hasOwnProperty.call(row,name)) return row[name];
+  }
+  return '';
+}
 
+function applyBackendCommittees(rows){
+  if(!Array.isArray(rows)) return;
+
+  const activeRows=rows.filter(row=>{
+    const active=committeeField(row,['Active','active']);
+    return active===true || String(active).trim().toUpperCase()==='TRUE';
+  });
+
+  if(!activeRows.length) return;
+
+  const existingById={};
+  Object.keys(committeeMapData).forEach(key=>{
+    committeeMapData[key].roles.forEach(role=>{ existingById[role.id]=role; });
+  });
+
+  const nextRoles={
+    community:[],
+    fundraising:[],
+    special:[],
+    instructional:[],
+    classroom:[]
+  };
+
+  activeRows.forEach(row=>{
+    const id=String(committeeField(row,['ID','id'])||'').trim();
+    const parentName=String(committeeField(row,['Committee','committee'])||'').trim();
+    const key=committeeParentKey(parentName);
+    if(!id || !key) return;
+
+    const prior=existingById[id]||{};
+    const page=String(committeeField(row,['Page','page'])||id).trim();
+
+    nextRoles[key].push({
+      id:id,
+      icon:prior.icon||'🦉',
+      name:String(committeeField(row,['Subcommittee','subcommittee'])||prior.name||id).trim(),
+      liaisons:String(committeeField(row,['Liasons','Liaisons','liaisons','liasons'])||'').trim(),
+      summary:String(committeeField(row,['Description','description'])||'').trim(),
+      contact:String(committeeField(row,['Contact','contact'])||'').trim(),
+      page:page,
+      panel:id==='yearbook' ? 'yearbook' : (prior.panel||'')
+    });
+  });
+
+  Object.keys(nextRoles).forEach(key=>{
+    if(nextRoles[key].length){
+      committeeMapData[key].roles=nextRoles[key];
+    }
+  });
+
+  const activeButton=document.querySelector('#committeemap .committee-card.active');
+  const activeKey=activeButton ? activeButton.dataset.committee : 'community';
+  renderCommittee(activeKey || 'community',activeButton || document.querySelector('#committeemap .committee-card[data-committee="community"]'));
+
+  const requested=new URLSearchParams(window.location.search).get('committee');
+  if(requested){
+    const currentPanel=document.querySelector('.panel.active');
+    if(currentPanel && (currentPanel.id==='subcommitteeDetail' || currentPanel.id==='yearbook')){
+      openSubcommittee(requested);
+    }
+  }
+}
+
+async function refreshCommitteesFromBackend(){
+  try{
+    const response=await fetch(VIPS_BACKEND_URL+'?_='+Date.now(),{cache:'no-store'});
+    if(!response.ok) throw new Error('Backend unavailable');
+    const data=await response.json();
+    applyBackendCommittees(data.committees||[]);
+  }catch(error){
+    // Keep the embedded last-known committee directory as the graceful fallback.
+  }
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  const initialButton=document.querySelector('#committeemap .committee-card[data-committee="community"]');
+  renderCommittee('community',initialButton);
+
+  const requested=new URLSearchParams(window.location.search).get('committee');
+  if(requested&&findSubcommitteeById(requested)) openSubcommittee(requested);
+
+  // Committees render instantly from embedded last-known data, then refresh silently.
+  refreshCommitteesFromBackend();
+});
 
 let featuredIndex = 0;
 
