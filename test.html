@@ -956,15 +956,29 @@ header h1{position:relative;z-index:1;margin-top:15px}
 <meta content="VIPS Hub" name="application-name"/>
 
 <style id="backend-first-paint-gate">
-  html.backend-pending #featuredWrap,
   html.backend-pending #cards,
   html.backend-pending #upcomingDateList,
   html.backend-pending #schoolCafeMenuCard { display:none !important; }
 
-  html.backend-pending #featuredWrap.backend-resolved,
   html.backend-pending #cards.backend-resolved,
   html.backend-pending #upcomingDateList.backend-resolved,
   html.backend-pending #schoolCafeMenuCard.backend-resolved { display:revert !important; }
+
+  /* Reserve the Featured area during its backend fetch so content below it never jumps. */
+  html.backend-pending #featuredWrap:not(.backend-zero-state){display:block !important;}
+  html.backend-pending #featuredWrap:not(.backend-resolved):not(.backend-zero-state) #featuredReel{
+    visibility:hidden;
+    min-height:165px;
+    border:1px solid var(--line);
+    border-radius:18px;
+    background:rgba(255,255,255,.42);
+    box-shadow:var(--shadow);
+  }
+  html.backend-pending #featuredWrap:not(.backend-resolved) .featured-controls,
+  html.backend-pending #featuredWrap:not(.backend-resolved) .featured-dots{visibility:hidden;}
+  html.backend-pending #featuredWrap.backend-resolved #featuredReel,
+  html.backend-pending #featuredWrap.backend-resolved .featured-controls,
+  html.backend-pending #featuredWrap.backend-resolved .featured-dots{visibility:visible;}
   #featuredWrap.backend-zero-state { display:none !important; }
 </style>
 <script>document.documentElement.classList.add('backend-pending');</script>
@@ -1020,7 +1034,7 @@ For multi-day items, remove only after data-end-date has passed.
 <span id="newsBannerDescription">For official updates and events from McGown, be sure to review the latest News From the Nest. Note that official school events and VIPS events are managed separately.</span>
 </div>
 </div>
-<div class="featured-wrap" id="featuredWrap" style="display:none">
+<div class="featured-wrap" id="featuredWrap">
 <div class="featured-head">
 <strong>Featured</strong>
 <div class="featured-controls">
